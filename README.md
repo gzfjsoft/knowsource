@@ -108,3 +108,16 @@ knowsource.cn 的技术优势，不在某一个模型名词，而在“体系化
 
 AI 时代，真正的竞争力不是“谁先接入模型”，而是“谁先把知识能力组织化”。  
 知源智库 knowsource.cn 提供的，正是一条从“文档管理”走向“组织智能”的可执行路径。
+
+## 版权与许可
+
+Copyright (C) 2025-2026 广州丰捷软件技术有限公司  
+
+本项目采用 [GNU General Public License](https://www.gnu.org/licenses/) 发布：您可以选择遵循 **GPL v2** 或 **GPL v3**（或 FSF 发布的任何更高版本）的条款使用、修改和分发本软件。
+
+- 英文许可正文：[`LICENSE`](./LICENSE)
+- 中文许可译文：[`LICENSE.zh-CN`](./LICENSE.zh-CN)
+- 版权摘要：[`COPYRIGHT`](./COPYRIGHT)
+
+本程序是自由软件；您可以遵照 GNU 通用公共授权第二版或（由您选择）任何更高版本的条款，重新发布和/或修改本程序。官方中文参考译文见 [GPL v2](https://www.gnu.org/licenses/old-licenses/gpl-2.0-zh-cn.html) 与 [GPL v3](https://www.gnu.org/licenses/gpl-3.0.zh-cn.html)。
+

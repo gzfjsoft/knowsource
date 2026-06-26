@@ -1,3 +1,13 @@
+// knowsource-lite CLI
+// Copyright (C) 2025-2026 广州丰捷软件技术有限公司
+//
+// SPDX-License-Identifier: GPL-2.0-or-later
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+// See LICENSE in the repository root.
 package main
 
 import (
