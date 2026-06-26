@@ -1,0 +1,25 @@
+package handler
+
+import (
+	"knowsource/common/response"
+	"net/http"
+
+	"knowsource/api/internal/logic"
+	"knowsource/api/internal/svc"
+	"knowsource/api/internal/types"
+
+	"github.com/zeromicro/go-zero/rest/httpx"
+)
+
+func RegisterHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.RegisterRequest
+		if err := httpx.Parse(r, &req); err != nil {
+			httpx.OkJsonCtx(r.Context(), w, response.Fail(response.InvalidRequestParamCode, err.Error()))
+			return
+		}
+
+		l := logic.NewRegisterLogic(r.Context(), svcCtx)
+		httpx.OkJsonCtx(r.Context(), w, l.Register(&req))
+	}
+}

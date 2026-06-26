@@ -1,0 +1,85 @@
+package logic
+
+import (
+	"context"
+	"time"
+
+	"knowsource/api/internal/svc"
+	"knowsource/api/internal/types"
+	"knowsource/common/response"
+	"knowsource/model"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type VerifyEmailLogic struct {
+	logx.Logger
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+}
+
+func NewVerifyEmailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *VerifyEmailLogic {
+	return &VerifyEmailLogic{
+		Logger: logx.WithContext(ctx),
+		ctx:    ctx,
+		svcCtx: svcCtx,
+	}
+}
+
+func (l *VerifyEmailLogic) VerifyEmail(req *types.VerifyEmailRequest) (resp *types.Response, err error) {
+
+	newResponse := func(code int64, message string, info string) *types.Response {
+		return &types.Response{
+			Code:    code,
+			Message: message,
+			Info:    info,
+		}
+	}
+
+	// Verify the provided code
+	verificationCode, err := l.svcCtx.VerificationCodesModel.FindOneByEmail(l.ctx, req.Email)
+	if err != nil {
+		if err == model.ErrNotFound {
+			logx.Error("邮箱验证码不存在或已过期")
+			return newResponse(response.ParameterErrorCode, "邮箱验证码不存在或已过期", err.Error()), nil
+		}
+		return newResponse(response.ServerErrorCode, "服务器错误，请联系客服", "(FindOneByEmail)"+err.Error()), nil
+	}
+
+	logx.Info("verificationCode", verificationCode)
+
+	if verificationCode.Code != req.Code {
+		logx.Error("邮箱验证码错误", verificationCode.Code, req.Code)
+		return newResponse(response.ParameterErrorCode, "邮箱验证码错误", "The provided code does not match"), nil
+	}
+
+	// Check if the code has expired (assuming 5 minutes expiration)
+	if time.Now().After(verificationCode.ExpirationTime) {
+		logx.Error("邮箱验证码已过期", verificationCode.ExpirationTime)
+		return newResponse(response.ParameterErrorCode, "邮箱验证码已过期", "Please request a new verification code"), nil
+	}
+
+	user, err := l.svcCtx.UsersModel.FindOneByEmail(l.ctx, req.Email)
+	if err != nil {
+		if err == model.ErrNotFound {
+			return newResponse(response.ParameterErrorCode, "用户不存在", "User not found"), nil
+		} else {
+			return newResponse(response.ServerErrorCode, "服务器错误，请联系客服", "(FindOneByEmail)"+err.Error()), nil
+		}
+	}
+
+	user.Email = req.Email
+	user.IsEmailVerified = 1
+	err = l.svcCtx.UsersModel.Update(l.ctx, user)
+	if err != nil {
+		return newResponse(response.ServerErrorCode, "服务器错误，请联系客服", "(UpdateUser)"+err.Error()), nil
+	}
+
+	// Delete the used verification code
+	err = l.svcCtx.VerificationCodesModel.Delete(l.ctx, verificationCode.Id)
+	if err != nil {
+		logx.Error("Failed to delete verification code:", err)
+	}
+
+	return newResponse(response.SuccessCode, "绑定成功", ""), nil
+}

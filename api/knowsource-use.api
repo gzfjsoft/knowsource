@@ -1,0 +1,135 @@
+syntax = "v1"
+
+// Vue 管理端实际使用的、自 api 拆出的接口（sys/version、conf/ai 全套）
+
+info (
+	title:    "knowsource 前端在用 API"
+	desc:     "从 api 分离，便于与后台大屏/ 业务 API 拆分维护"
+	author:   "system"
+	version:  "v1.0"
+	filename: "knowsource-use.api"
+)
+
+// 分页响应（原 api 节选；不 import 整份 api，避免合并进全套 路由）
+type PageResponse {
+	Total int64       `json:"total"`
+	List  interface{} `json:"list"`
+}
+
+// ID 路径参数（原 api 节选）
+type PathIdRequest {
+	Id int64 `path:"id"`
+}
+
+// 分页（表单，与 conf/ai list 查询一致）
+type PathPageRequest {
+	Page     int64 `form:"page,optional"`
+	PageSize int64 `form:"pageSize,optional"`
+}
+
+// ==================== AI配置（Vue: knowdata.js / AIChat） ====================
+type KnowdataAIConfigInfo {
+	Id           int64  `json:"id"`           // AI配置ID
+	Name         string `json:"name"`         // 值
+	DocumentCode string `json:"documentCode"` // 文档代码
+	Value        string `json:"value"`        // 名称
+	CreatedAt    string `json:"createdAt"`    // 创建时间
+	CreatedBy    string `json:"createdBy"`    // 创建人
+	UpdatedAt    string `json:"updatedAt"`    // 修改时间
+	UpdatedBy    string `json:"updatedBy"`    // 修改人
+}
+
+type KnowdataAIConfigListRequest {
+	PathPageRequest
+	Name         string `form:"name,optional"`         // 名称
+	DocumentCode string `form:"documentCode,optional"` // 文档类型编码
+}
+
+type KnowdataCreateAIConfigRequest {
+	DocumentCode string `json:"documentCode,optional"`
+	Name         string `json:"name"`  // 名称
+	Value        string `json:"value"` // 值
+}
+
+type KnowdataUpdateAIConfigRequest {
+	Id           int64  `json:"id"` // AI配置ID
+	DocumentCode string `json:"documentCode,optional"`
+	Name         string `json:"name"`  // 值
+	Value        string `json:"value"` // 名称
+}
+
+type GetAIConfigByNameRequest {
+	Name         string `path:"name"`
+	DocumentCode string `path:"documentCode,optional"`
+}
+
+type GetAIConfigByNameCodeRequest {
+	Name         string `json:"name"`
+	DocumentCode string `json:"documentCode,optional"`
+}
+
+type GetAIConfigByNameResp {
+	Response
+	Data *KnowdataAIConfigInfo `json:"data,omitempty"`
+}
+
+// ==================== 需登录：AI 配置 CRUD ====================
+@server (
+	prefix:     /api
+	group:      knowdata
+	middleware: Auth
+	timeout:    90s
+)
+service fca-api {
+	@doc "获取AI配置"
+	@handler GetAIConfig
+	get /conf/ai/:id (PathIdRequest) returns (KnowdataAIConfigInfo)
+
+	@doc "获取AI配置列表"
+	@handler GetAIConfigList
+	get /conf/ai/list (KnowdataAIConfigListRequest) returns (PageResponse)
+
+	@doc "创建AI配置"
+	@handler CreateAIConfig
+	post /conf/ai (KnowdataCreateAIConfigRequest)
+
+	@doc "更新AI配置"
+	@handler UpdateAIConfig
+	post /conf/ai/:id (KnowdataUpdateAIConfigRequest)
+
+	@doc "删除AI配置"
+	@handler DeleteAIConfig
+	delete /conf/ai/:id (PathIdRequest)
+}
+
+// ==================== 无需登录：系统版本 ====================
+@server (
+	prefix:  /api
+	group:   knowdata
+	timeout: 90s
+)
+service fca-api {
+	@doc "系统版本信息"
+	@handler SysVersion
+	get /sys/version returns (Response)
+}
+
+// ==================== 按名称取配置 ====================
+@server (
+	prefix:     /api
+	group:      knowdata
+	timeout:    90s
+)
+service fca-api {
+	@doc "获取AI配置"
+	@handler GetAIConfigByName
+	get /conf/ai/name/:name (GetAIConfigByNameRequest) returns (GetAIConfigByNameResp)
+
+	@doc "获取AI配置byname和documentCode"
+	@handler GetAIConfigByNameCode
+	post /conf/ai/code/name/get (GetAIConfigByNameCodeRequest) returns (GetAIConfigByNameResp)
+	
+	@doc "系统状态检查"
+	@handler SysPing
+	get /sys/ping
+}

@@ -1,0 +1,389 @@
+// fca-ai.api
+syntax = "v1"
+
+info(
+    title: "AI Service API"
+    desc: "AI聊天和会话管理服务"
+    author: "PeterSZW"
+    version: "1.0"
+    filename: "fca-ai.api"
+)
+
+type OllamaRequest   {
+    Model    string    `json:"model"`
+    Messages []AIMessage `json:"messages"`
+    Think    bool      `json:"think"`
+    Stream   bool      `json:"stream"`
+}
+
+type AIMessage   {
+    Role    string `json:"role"`
+    Content string `json:"content"`
+    Thinking string `json:"thinking,omitempty,optional"`
+	CreatedAt    int64  `json:"created_at,omitempty"`    // 时间戳
+	Files []string `json:"files,omitempty,optional"`     // 参考资料/附件
+}
+
+
+type OllamaResponse   {
+	Model        string    `json:"model"`
+	CreatedAt string `json:"created_at"`
+	CreatedAtUnix int64 `json:"created_at_unix"`
+	Message      AIMessage   `json:"message"`
+	Thinking     string    `json:"thinking"`
+	DoneReason   string    `json:"done_reason"`
+	Done         bool      `json:"done"`
+	TotalDuration int64    `json:"total_duration"`
+	LoadDuration  int64    `json:"load_duration"`
+	PromptEvalCount int    `json:"prompt_eval_count"`
+	PromptEvalDuration int64 `json:"prompt_eval_duration"`
+	EvalCount    int       `json:"eval_count"`
+	EvalDuration int64     `json:"eval_duration"`
+}
+
+// vLLM 请求格式 (OpenAI 兼容)
+type VLLMRequest {
+	Model       string      `json:"model"`
+	Messages    []AIMessage `json:"messages"`
+	Temperature float64     `json:"temperature,omitempty"`
+	MaxTokens   int         `json:"max_tokens,omitempty"`
+	Stream      bool        `json:"stream,omitempty"`
+	TopP        float64     `json:"top_p,omitempty"`
+	TopK        int         `json:"top_k,omitempty"`
+	Stop        []string    `json:"stop,omitempty"`
+	PresencePenalty float64 `json:"presence_penalty,omitempty"`
+	FrequencyPenalty float64 `json:"frequency_penalty,omitempty"`
+}
+
+// vLLM 响应格式 (OpenAI 兼容)
+type VLLMResponse {
+	ID      string `json:"id"`
+	Object  string `json:"object"`
+	Created int64  `json:"created"`
+	Model   string `json:"model"`
+	Choices []VLLMChoice `json:"choices"`
+	Usage   VLLMUsage `json:"usage"`
+}
+
+type VLLMChoice {
+	Index        int       `json:"index"`
+	Message      AIMessage `json:"message"`
+	FinishReason string    `json:"finish_reason"`
+}
+
+type VLLMUsage {
+	PromptTokens     int `json:"prompt_tokens"`
+	CompletionTokens int `json:"completion_tokens"`
+	TotalTokens      int `json:"total_tokens"`
+}
+
+// 如果documentCode不为空，则从数据库中获取文档内容
+
+
+type AISessionChatRequest   {
+	Message string `json:"message"`
+	CategoryId int64 `json:"categoryId,optional"`
+	Keys string `json:"keys,omitempty"`
+	BusinessId int64 `json:"businessId,optional"`
+	Session string `json:"session,omitempty"`
+	Think   bool   `json:"think,omitempty"`
+	Prompt string `json:"prompt,omitempty"`
+	Model string `json:"model,omitempty"`
+	DocumentCode string `json:"documentCode,optional"`
+	Tags []string `json:"tags,omitempty,optional"`
+	Test bool `json:"test,omitempty,optional"`
+	// skiprag 为 true 时，完全跳过 RAG/全文检索，仅使用对话内容（含临时上传文档）调用大模型
+	Skiprag bool `json:"skiprag,omitempty,optional"`
+	
+}
+
+// ChatResponse represents the response to the client
+type AISessionChatResponse   {
+    Response
+    Data AISessionChatData `json:"data"`
+}
+
+type AISessionChatData   {
+	Session  string `json:"session,omitempty"`
+    Response string `json:"response"`
+
+    
+}
+
+// RAG 检索预览：仅返回结构化 RAG 文档列表（不拼接 ragContext），不调用聊天模型
+type AIRagRetrieveRequest {
+	Message string `json:"message"`
+	DocumentCode string `json:"documentCode"`
+	Tags []string `json:"tags,omitempty,optional"`
+	Skiprag bool `json:"skiprag,omitempty,optional"`
+}
+
+type AIRagRetrieveResponse {
+	Response
+	Data *AIRagRetrieveData `json:"data,omitempty"`
+}
+
+// 单条 RAG 文档：source = fulltext | summary | vector
+type AIRagDocumentItem {
+	Source string `json:"source"`
+	Content string `json:"content"`
+	FileName string `json:"fileName,optional"`
+	Path string `json:"path,optional"`
+	RawDocId int64 `json:"rawDocId,optional"`
+	Page int `json:"page,optional"`
+	QdrantId string `json:"qdrantId,optional"`
+	SimilarityScore float64 `json:"similarityScore"`
+	RerankScore float64 `json:"rerankScore,optional"`
+}
+
+// 与向量检索内部 RerankInfo 对齐，便于判断是否真的调用了重排服务
+type AIRagRerankDiag {
+	UsedRerank bool `json:"usedRerank"`
+	Error string `json:"error,optional"`
+	RerankTopK int `json:"rerankTopK,optional"`
+	OriginalCount int `json:"originalCount,optional"`
+	RerankedCount int `json:"rerankedCount,optional"`
+}
+
+type AIRagRetrieveData {
+	Documents []AIRagDocumentItem `json:"documents"`
+	RawSearchUsed bool `json:"rawSearchUsed"`
+	VectorSearchUsed bool `json:"vectorSearchUsed"`
+	FullTextMs int64 `json:"fullTextMs"`
+	MainSearchMs int64 `json:"mainSearchMs"`
+	SubSearchMs int64 `json:"subSearchMs"`
+	RerankConfigured bool `json:"rerankConfigured"`
+	SummaryRerank *AIRagRerankDiag `json:"summaryRerank,omitempty"`
+	ChunkRerank *AIRagRerankDiag `json:"chunkRerank,omitempty"`
+}
+
+
+
+// 历史会话列表响应
+type   HistoryListResponse {
+	Response
+	Sessions []SessionInfo `json:"sessions"` // 会话列表
+}
+
+// 会话基本信息
+//AiSessions ai_sessions
+type SessionInfo {
+	Session  string `json:"session"`   // 会话ID
+	CategoryId int64 `json:"categoryId"`   // 分类ID
+	Keys string `json:"keys"`   // 关键词
+	EmpCode string `json:"empCode"`   // 员工编码
+	DocumentTypeCode string `json:"documentTypeCode"`   // 文档类型编码
+	Title string `json:"title"`   // 会话标题
+	Tags string  `json:"tags"`    
+	LastQuery  string `json:"lastQuery"`   // 最后一条提问
+	LastReply  string `json:"lastReply"`   // 最后一条回复
+	UpdateTime int64  `json:"updateTime"`  // 最后更新时间
+}
+
+// 单会话历史详情请求
+type   SessionDetailRequest {
+		Session string `json:"session"`  // 必传，会话ID
+}
+
+type   SessionDeleteRequest {
+	Session string `json:"session"`  // 必传，会话ID
+}
+
+// 批量删除历史会话请求
+type   SessionBatchDeleteRequest {
+	Sessions []string `json:"sessions"`  // 必传，会话ID列表
+}
+
+// 单会话历史详情响应
+type  SessionDetailResponse {
+	Response
+	Messages []AIMessage `json:"messages"` // 消息列表（按时间排序）
+}
+
+// AI对话上传临时文档：请求体可为空，文件通过 multipart/form-data 的 file 字段上传
+type AIChatUploadDocumentRequest {
+}
+
+// AI对话上传临时文档响应
+type AIChatUploadDocumentResponse {
+	Response
+	Data *AIChatUploadDocumentData `json:"data,optional"`
+}
+
+type AIChatUploadDocumentData {
+	Filename string `json:"filename"` // 上传的文件名
+	Message  string `json:"message"`  // 提示信息，如「已识别并缓存，发送消息时将作为参考」
+}
+
+// 按文件名从对话缓存中移除一条文档
+type AIChatRemoveDocumentRequest {
+	Filename string `json:"filename"` // 要移除的文件名（与上传时一致）
+}
+ 
+
+// 判断两段文字主要内容是否一致（调用 LLM），供测试脚本等调用
+type TextConsistencyRequest {
+	Prompt string `json:"prompt"`
+	
+	Text1 string `json:"text1"`
+	Text2 string `json:"text2"`
+}
+
+type TextConsistencyResponse {
+	Response
+	Data TextConsistencyData `json:"data"`
+}
+
+type TextConsistencyData {
+	Consistent bool `json:"consistent"` // true=一致(yes)，false=不一致(no)
+}
+
+
+@server (
+	prefix:     /api
+	timeout:    300s
+	middleware: Auth
+    group:      ai
+)
+service fca-api {
+	@doc "AI聊天" 
+    @handler AIChatHandler
+    post /ai/chat (OllamaRequest) returns (OllamaResponse)
+
+    // @handler VLLMChatHandler
+    // post /ai/vllm/chat (VLLMRequest) returns (VLLMResponse)
+
+	@doc "会话聊天"
+    @handler AISessionChatHandler
+    post /ai/session/chat (AISessionChatRequest) returns (AISessionChatResponse)
+
+	@doc "RAG 检索预览（不走聊天模型）"
+	@handler AIRagRetrieveHandler
+	post /ai/rag/retrieve (AIRagRetrieveRequest) returns (AIRagRetrieveResponse)
+  
+    @doc "会话聊天选项"
+    @handler AISessionChatOptionsHandler
+    options /ai/session/chat (AISessionChatRequest) returns (AISessionChatResponse)
+ 
+	@doc "历史会话列表"
+    @handler HistoryListHandler
+    post /ai/chat/history/list  returns (HistoryListResponse)
+
+	@doc "历史会话详情"
+    @handler SessionDetailHandler
+    post /ai/chat/history/detail (SessionDetailRequest) returns (SessionDetailResponse)
+
+	@doc "删除历史会话"
+    @handler HistoryDeleteHandler
+    post /ai/chat/history/delete (SessionDeleteRequest) returns (Response)
+
+	@doc "批量删除历史会话"
+    @handler HistoryBatchDeleteHandler
+    post /ai/chat/history/batch-delete (SessionBatchDeleteRequest) returns (Response)
+
+	@doc "AI对话上传临时文档（txt/docx/pdf），识别内容并写入对话缓存，发下一条消息时作为参考并清除缓存"
+	@handler AIChatUploadDocumentHandler
+	post /ai/chat/upload-document (AIChatUploadDocumentRequest) returns (AIChatUploadDocumentResponse)
+
+	@doc "AI对话删除已上传的临时文档（按文件名从缓存移除）"
+	@handler AIChatRemoveDocumentHandler
+	post /ai/chat/upload-document/remove (AIChatRemoveDocumentRequest) returns (Response)
+
+	@doc "判断两段文字主要内容是否一致（调用 LLM），供测试脚本使用"
+	@handler TextConsistencyHandler
+	post /ai/text/consistency (TextConsistencyRequest) returns (TextConsistencyResponse)
+
+	@doc "管理员获取ailog.txt list"
+	@handler GetAiLogListHandler
+	get /admin/ailog/list returns (GetAiLogListResponse)
+
+	@doc "管理员删除ailog.txt"
+	@handler DeleteAiLogHandler
+	get /admin/ailog/delete/:name (PathNameRequest) returns (Response)	
+
+
+	@doc "管理员获取ailog.txt"
+	@handler GetAiLogHandler
+	get /admin/ailog/get/:name (PathNameRequest) returns (GetAiLogResponse)
+
+	@doc "管理员获取问答抽取LLM日志列表"
+	@handler GetRawDocQaLlmLogListHandler
+	get /admin/rawdoc/qa-llm-log/list returns (GetRawDocQaLlmLogListResponse)
+
+	@doc "管理员获取问答抽取LLM日志内容"
+	@handler GetRawDocQaLlmLogHandler
+	get /admin/rawdoc/qa-llm-log/get/:name (PathNameRequest) returns (GetAiLogResponse)
+
+	@doc "管理员删除问答抽取LLM日志"
+	@handler DeleteRawDocQaLlmLogHandler
+	get /admin/rawdoc/qa-llm-log/delete/:name (PathNameRequest) returns (Response)
+
+	@doc "超级管理员获取Qdrant集合列表"
+	@handler GetQdrantCollectionListHandler
+	get /admin/qdrant/collection/list returns (GetQdrantCollectionListResponse)	
+
+}
+
+
+
+type PathNameRequest {
+	Name string `path:"name"`
+}
+
+//ailog
+type GetAiLogListResponse {
+	Response
+	Data *GetAiLogListResponseData `json:"data,omitempty"`
+}
+type GetAiLogListResponseData {
+	List []AiLogFileItem `json:"list"`
+}
+type AiLogFileItem {
+	Name     string `json:"name"`
+	DateTime int64  `json:"datetime"` // 文件修改时间 Unix 时间戳
+}
+type GetAiLogResponse {
+	Response
+	Data *GetAiLogResponseData `json:"data,omitempty"`
+}
+
+type GetRawDocQaLlmLogListResponse {
+	Response
+	Data *GetRawDocQaLlmLogListResponseData `json:"data,omitempty"`
+}
+type GetRawDocQaLlmLogListResponseData {
+	List []AiLogFileItem `json:"list"`
+}
+
+// Qdrant collection list
+// 超级管理员获取Qdrant集合列表
+// 只返回集合名称列表
+// 需要superadmin权限
+// 路径: /admin/qdrant/collection/list
+// 方法: GET
+// 参数: 无
+// 返回: GetQdrantCollectionListResponse
+// 返回示例:
+// {
+//   "code": 200,
+//   "message": "success",
+//   "data": {
+//     "list": ["collection1", "collection2", "collection3"]
+//   }
+// }
+// 错误码:
+// 401: 未登录
+// 403: 没有权限
+// 500: 服务器错误
+// 503: Qdrant服务不可用
+type GetQdrantCollectionListResponse {
+	Response
+	Data *GetQdrantCollectionListResponseData `json:"data,omitempty"`
+}
+type GetQdrantCollectionListResponseData {
+	List []string `json:"list"`
+}
+type GetAiLogResponseData {
+	Content string `json:"content"`
+}
+

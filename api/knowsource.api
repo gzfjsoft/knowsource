@@ -1,0 +1,1462 @@
+syntax = "v1"
+
+info (
+	title:    "knowsource Management API"
+	desc:     "API for knowsource Management"
+	author:   " Peter  "
+	email:    "xxxxxxxx@163.com"
+	version:  "v1.0.1"
+	filename: "knowsource.api"
+)
+ 
+// ==================== 登录相关 ====================
+type KnowsourceLoginRequest {
+	ClientId string `json:"clientId"` // 企业账户名
+	EmpCode  string `json:"empCode"`  // 员工编码
+	Password string `json:"password"`  // 密码
+	Captcha  string `json:"captcha,optional"`    // 验证码
+	CaptchaId string `json:"captchaId,optional"` // 验证码ID
+	IsDebug int64 `json:"isDebug,optional"` // 是否为调试模式
+}
+
+// ==================== 登录相关 ====================
+type KnowsourceOALoginRequest {
+	ClientId string `json:"clientId"` // 企业账户名
+	UserId  string `json:"userId"`  // 用户ID
+	Code string `json:"code"`  // 验证码
+}
+
+
+type KnowsourceLoginResponse {
+	Response
+	Data *KnowsourceLoginData `json:"data,omitempty"`
+}
+
+type KnowsourceLoginData {
+	Token    string        `json:"token"`
+	UserInfo KnowsourceEmpInfo `json:"userInfo"`
+}
+
+type KnowsourceEmpInfo {
+	EmpCode    string `json:"empCode"`
+	EmpName    string `json:"empName"`
+	ClientId   string `json:"clientId,optional"` // 企业账户 ID（租户）
+	ClientName string `json:"clientName,optional"` // 平台名称（来自 client.client_json_info.name）
+	ClientDesp string `json:"clientDesp,optional"` // 平台描述（来自 client.client_json_info.desp）
+	DeptCode   string `json:"deptCode"`
+	DeptName   string `json:"deptName"`
+	Status     int64  `json:"status"`
+	Position   string `json:"position"`
+	Mobile     string `json:"mobile,optional"`
+	Email      string `json:"email,optional"`
+	// Role       string `json:"role"`
+	CreatedAt  string `json:"createdAt,optional"`
+	EmpPermissions []string `json:"empPermissions,optional"`
+	Roles      []string `json:"roles,optional"`
+}
+
+// ==================== 租户自助注册 / 验证 / 找回密码 / 绑定联系方式 ====================
+type KnowsourceTenantRegisterRequest {
+	ClientId    string `json:"clientId"`    // 企业账户名（>6 位；仅字母/数字/下划线/横线）
+	CompanyName string `json:"companyName"` // 企业名称（显示名）
+	OwnerEmail  string `json:"ownerEmail"`  // 邮箱（用于验证与找回）
+	OwnerMobile string `json:"ownerMobile"` // 手机号（用于找回/绑定）
+	Password    string `json:"password"`    // 密码：>=8 位，且包含大小写字母、数字、符号
+	Desp        string `json:"desp,optional"`
+}
+
+type KnowsourceTenantRegisterData {
+	ClientId   string `json:"clientId"`
+	Username   string `json:"username"`   // 固定为 superadmin
+	NeedVerify bool   `json:"needVerify"` // 是否已发送邮箱验证码，需调用 verify-email
+}
+
+type KnowsourceTenantRegisterResponse {
+	Response
+	Data *KnowsourceTenantRegisterData `json:"data,omitempty"`
+}
+
+type KnowsourceTenantVerifyEmailRequest {
+	ClientId string `json:"clientId"`
+	Code     string `json:"code"`
+}
+
+type KnowsourceTenantSendVerificationCodeRequest {
+	ClientId string `json:"clientId"`
+}
+
+type KnowsourcePasswordResetSendCodeRequest {
+	ClientId string `json:"clientId"`
+	Channel  string `json:"channel"` // email | phone
+	Email    string `json:"email,optional"`
+	Phone    string `json:"phone,optional"`
+}
+
+type KnowsourcePasswordResetConfirmRequest {
+	ClientId    string `json:"clientId"`
+	Channel     string `json:"channel"` // email | phone
+	Email       string `json:"email,optional"`
+	Phone       string `json:"phone,optional"`
+	Code        string `json:"code"`
+	NewPassword string `json:"newPassword"`
+}
+
+type KnowsourceContactBindSendRequest {
+	Channel   string `json:"channel"` // email | phone
+	NewEmail  string `json:"newEmail,optional"`
+	NewPhone  string `json:"newPhone,optional"`
+}
+
+type KnowsourceContactBindConfirmRequest {
+	Channel   string `json:"channel"`
+	NewEmail  string `json:"newEmail,optional"`
+	NewPhone  string `json:"newPhone,optional"`
+	Code      string `json:"code"`
+}
+
+// ==================== 修改密码相关 ====================
+type KnowsourceChangePasswordRequest {
+	EmpCode    string `json:"empCode"`    // 员工编码
+	OldPassword string `json:"oldPassword"` // 旧密码
+	NewPassword string `json:"newPassword"` // 新密码
+}
+
+// ==================== 员工知识库权限相关 ====================
+type KnowsourceEmpDocumentTypeRequest {
+	EmpCode         string `json:"empCode"`         // 员工编码
+	DocumentTypeCode string `json:"documentTypeCode"` // 文档类型编码
+}
+
+type KnowsourceEmpDocumentTypeDeleteRequest {
+	Id int64 `json:"id"` // 关联表主键ID
+}
+
+type KnowsourceEmpDocumentTypeListRequest {
+	PageRequest
+	EmpName         string `json:"empName,optional"`         // 员工姓名（可选，用于筛选）
+	EmpCode         string `json:"empCode,optional"`         // 员工编码（可选，用于筛选）
+	
+}
+
+
+type KnowsourceEmpDocumentTypeListGroupResponse {
+	Response
+	Data *KnowsourceEmpDocumentTypeListGroupData `json:"data,omitempty"`
+}
+
+type KnowsourceEmpDocumentTypeListGroupData {
+	List  []KnowsourceEmpDocumentTypeInfoGroup `json:"list"`
+	Total int64                      `json:"total"`
+}
+type KnowsourceEmpDocumentTypeInfoGroup {
+	EmpCode           string   `json:"empCode"`
+	EmpName           string   `json:"empName,optional"`
+	DeptCode          string   `json:"deptCode,optional"`
+	DeptName          string   `json:"deptName,optional"`
+	CompanyName       string   `json:"companyName,optional"` // 员工部门编码前三位对应 fr_dept 的 CONTENT（公司名称）
+	DocumentTypeCodes []string `json:"documentTypeCodes"`
+	DocumentTypeNames []string `json:"documentTypeNames"`
+}
+type KnowsourceEmpDocumentTypeListResponse {
+	Response
+	Data *KnowsourceEmpDocumentTypeListData `json:"data,omitempty"`
+}
+
+
+type KnowsourceEmpDocumentTypeListData {
+	List  []KnowsourceEmpDocumentTypeInfo `json:"list"`
+	Total int64                      `json:"total"`
+}
+
+type KnowsourceEmpDocumentTypeInfo {
+	Id               int64  `json:"id"`
+	EmpCode          string `json:"empCode"`
+	EmpName          string `json:"empName,optional"`
+	DocumentTypeCode string `json:"documentTypeCode"`
+	DocumentTypeName string `json:"documentTypeName,optional"`
+	CreatedAt        string `json:"createdAt"`
+	UpdatedAt        string `json:"updatedAt"`
+}
+
+// ==================== 部门文档类型绑定相关 ====================
+type KnowsourceDeptDocumentTypeRequest {
+	DeptCode         string `json:"deptCode"`         // 部门编码
+	DocumentTypeCode string `json:"documentTypeCode"` // 文档类型编码
+}
+
+type KnowsourceDeptDocumentTypeDeleteRequest {
+	Id int64 `json:"id"` // 关联表主键ID
+}
+
+type KnowsourceDeptDocumentTypeListRequest {
+	PageRequest
+	DeptCode         string `json:"deptCode,optional"`         // 部门编码（可选，用于筛选）
+	DocumentTypeCode string `json:"documentTypeCode,optional"` // 文档类型编码（可选，用于筛选）
+}
+
+type KnowsourceDeptDocumentTypeListResponse {
+	Response
+	Data *KnowsourceDeptDocumentTypeListData `json:"data,omitempty"`
+}
+
+type KnowsourceDeptDocumentTypeListData {
+	List  []KnowsourceDeptDocumentTypeInfo `json:"list"`
+	Total int64                       `json:"total"`
+}
+
+type KnowsourceDeptDocumentTypeInfo {
+	Id               int64  `json:"id"`
+	DeptCode         string `json:"deptCode"`
+	DeptName         string `json:"deptName,optional"`
+	DocumentTypeCode string `json:"documentTypeCode"`
+	DocumentTypeName string `json:"documentTypeName,optional"`
+	CreatedAt        string `json:"createdAt"`
+	UpdatedAt        string `json:"updatedAt"`
+}
+
+// ==================== 员工列表相关 ====================
+type KnowsourceEmpListRequest {
+	PageRequest
+	EmpCode   string `json:"empCode,optional"`   // 员工编码（可选，用于筛选）
+	EmpName   string `json:"empName,optional"`   // 员工姓名（可选，用于筛选）
+	DeptCode  string `json:"deptCode,optional"`  // 部门编码（可选，用于筛选）
+ 	Status    string  `json:"status,optional"`    // 状态（可选，用于筛选）
+}
+
+type KnowsourceEmpListResponse {
+	Response
+	Data *KnowsourceEmpListData `json:"data,omitempty"`
+}
+
+type KnowsourceEmpListData {
+	List  []KnowsourceEmpListItem `json:"list"`
+	Total int64              `json:"total"`
+}
+
+type KnowsourceEmpListItem {
+	EmpCode       string `json:"empCode"`       // 员工编码
+	EmpName       string `json:"empName"`       // 员工姓名
+	DeptCode      string `json:"deptCode"`      // 部门编码
+	DeptName      string `json:"deptName,optional"`      // 部门名称
+	 
+	Position      string `json:"position"`     // 职位
+	Status        int64  `json:"status"`       // 状态
+ 
+	Branch        string   `json:"branch,optional"`       // 分支
+	Roles         []string `json:"roles,optional"`        // 角色列表
+}
+
+// ==================== 部门列表相关 ====================
+type KnowsourceDeptListRequest {
+	PageRequest
+	DeptCode   string `json:"deptCode,optional"`   // 部门编码（可选，用于筛选）
+	DeptName   string `json:"deptName,optional"`   // 部门名称（可选，用于筛选）
+	ParentCode string `json:"parentCode,optional"` // 父部门编码（可选，用于筛选）
+	 
+	Grade      int64  `json:"grade,optional"`    // 级别（可选，用于筛选）
+}
+
+type KnowsourceDeptListResponse {
+	Response
+	Data *KnowsourceDeptListData `json:"data,omitempty"`
+}
+
+type KnowsourceDeptListData {
+	List  []KnowsourceDeptListItem `json:"list"`
+	Total int64               `json:"total"`
+}
+
+type KnowsourceDeptListItem {
+	DeptCode   string `json:"deptCode"`   // 部门编码
+	DeptName   string `json:"deptName"`   // 部门名称
+	ParentCode string `json:"parentCode"` // 父部门编码
+	GSDM       string `json:"gsdm"`      // 公司代码
+	Grade      int64  `json:"grade"`     // 级别
+	EndMark    string `json:"endMark"`   // 结束标记
+	Kind       string `json:"kind"`      // 类型
+	B0110      string `json:"b0110,optional"` // 备注
+}
+
+// ==================== 部门增删改 ====================
+type KnowsourceDeptCreateRequest {
+	DeptCode   string `json:"deptCode"`             // 部门编码
+	DeptName   string `json:"deptName"`             // 部门名称
+	ParentCode string `json:"parentCode,optional"`  // 父部门编码
+	GSDM       string `json:"gsdm,optional"`        // 公司代码
+	Grade      int64  `json:"grade,optional"`       // 级别
+	EndMark    string `json:"endMark,optional"`     // 结束标记
+	Kind       string `json:"kind,optional"`        // 类型
+	B0110      string `json:"b0110,optional"`       // 备注
+}
+
+type KnowsourceDeptUpdateRequest {
+	DeptCode   string `json:"deptCode"`             // 部门编码（主键）
+	DeptName   string `json:"deptName"`             // 部门名称
+	ParentCode string `json:"parentCode,optional"`  // 父部门编码
+	GSDM       string `json:"gsdm,optional"`        // 公司代码
+	Grade      int64  `json:"grade,optional"`       // 级别
+	EndMark    string `json:"endMark,optional"`     // 结束标记
+	Kind       string `json:"kind,optional"`        // 类型
+	B0110      string `json:"b0110,optional"`       // 备注
+}
+
+type KnowsourceDeptDeleteRequest {
+	DeptCode string `json:"deptCode"` // 部门编码
+	Cascade  uint64 `json:"cascade,optional"` // 1: 删除整棵子树；0/空: 仅删除当前（若有子部门则失败）
+}
+
+type KnowsourceDeptMoveRequest {
+	DeptCode      string `json:"deptCode"`                 // 要移动的部门编码
+	NewParentCode string `json:"newParentCode,optional"`   // 新父部门编码；空表示移动为根节点
+}
+
+// ==================== 员工增删改 ====================
+type KnowsourceEmpCreateRequest {
+	EmpCode  string `json:"empCode"`             // 员工编码
+	EmpName  string `json:"empName"`             // 员工姓名
+	DeptCode string `json:"deptCode"`            // 部门编码
+	Position string `json:"position,optional"`   // 职位
+	Status   int64  `json:"status,optional"`     // 状态（0启用/1禁用），默认0
+	Branch   string `json:"branch,optional"`     // 分支
+	Mobile   string `json:"mobile,optional"`
+	Email    string `json:"email,optional"`
+}
+
+type KnowsourceEmpUpdateRequest {
+	EmpCode  string `json:"empCode"`             // 员工编码（主键）
+	EmpName  string `json:"empName"`             // 员工姓名
+	DeptCode string `json:"deptCode"`            // 部门编码
+	Position string `json:"position,optional"`   // 职位
+	Status   int64  `json:"status,optional"`     // 状态（0启用/1禁用）
+	Branch   string `json:"branch,optional"`     // 分支
+	Mobile   string `json:"mobile,optional"`
+	Email    string `json:"email,optional"`
+}
+
+type KnowsourceEmpDeleteRequest {
+	EmpCode string `json:"empCode"` // 员工编码
+}
+
+// ==================== 部门树相关 ====================
+type KnowsourceDeptTreeRequest {
+	GSDM       string `json:"gsdm,optional"`       // 公司代码（可选，用于筛选）
+	ParentCode string `json:"parentCode,optional"`  // 父部门编码（可选，用于筛选）
+}
+
+type KnowsourceDeptTreeResponse {
+	Response
+	Data *KnowsourceDeptTreeData `json:"data,omitempty"`
+}
+
+type KnowsourceDeptTreeData {
+	Tree []KnowsourceDeptTreeNode `json:"tree"`
+}
+
+type KnowsourceDeptTreeNode {
+	DeptCode   string                `json:"deptCode"`   // 部门编码
+	DeptName   string                `json:"deptName"`   // 部门名称
+	ParentCode string                `json:"parentCode"` // 父部门编码
+	GSDM       string                `json:"gsdm"`      // 公司代码
+	Grade      int64                 `json:"grade"`     // 级别
+	EndMark    string                `json:"endMark"`   // 结束标记
+	Kind       string                `json:"kind"`      // 类型
+	B0110      string                `json:"b0110,optional"` // 备注
+	Children   []KnowsourceDeptTreeNode   `json:"children"`   // 子部门列表
+}
+
+// ==================== 管理员重置密码 ====================
+type AdminResetPasswordRequest {
+	EmpCode string `json:"empCode"` // 员工编码
+	Password string `json:"password"` // 新密码
+}
+
+type AdminSetRoleRequest {	
+	EmpCode string `json:"empCode"` // 员工编码
+	Role string `json:"role"` // 角色
+}
+
+// ==================== Client 管理（系统管理）====================
+type AdminClientCreateRequest {
+	ClientId       string `json:"clientId"` // 要创建的 clientId
+	Name           string `json:"name"` // client 名称
+	Desp           string `json:"desp,optional"` // 描述
+	OwnerEmail     string `json:"ownerEmail,optional"` // 负责人邮箱（可选）
+}
+
+type AdminClientDeleteRequest {
+	ClientId string `json:"clientId"` // 要删除的 clientId
+}
+
+type AdminClientInfo {
+	ClientId       string `json:"clientId"`
+	Name           string `json:"name"`
+	Desp           string `json:"desp,optional"`
+	ClientJsonInfo string `json:"clientJsonInfo,optional"` // 便于排查，前端可不展示
+	CreatedAt      string `json:"createdAt,optional"`
+	UpdatedAt      string `json:"updatedAt,optional"`
+}
+
+type AdminClientListRequest {
+	PageRequest
+	ClientId string `json:"clientId,optional"` // 模糊筛选
+}
+
+type AdminClientListData {
+	List  []AdminClientInfo `json:"list"`
+	Total int64             `json:"total"`
+}
+
+type AdminClientListResponse {
+	Response
+	Data *AdminClientListData `json:"data,omitempty"`
+}
+
+type BlogItem {
+	Id          int64  `json:"id"`
+	Title       string `json:"title"`
+	Alias       string `json:"alias,optional"`
+	Summary     string `json:"summary,optional"`
+	Content     string `json:"content,optional"`
+	Tags        string `json:"tags,optional"`
+	Categories  string `json:"categories,optional"`
+	Authors     string `json:"authors,optional"`
+	Banner      string `json:"banner,optional"`
+	IsPublished int64  `json:"isPublished"`
+	CreatedAt   int64  `json:"createdAt"`
+	UpdatedAt   int64  `json:"updatedAt"`
+}
+
+type BlogListPublicRequest {
+	PageRequest
+	Keyword string `json:"keyword,optional"`
+}
+
+type BlogAdminListRequest {
+	PageRequest
+	Keyword     string `json:"keyword,optional"`
+	IsPublished int64  `json:"isPublished,optional"` // -1=全部,0=未发布,1=已发布
+}
+
+type BlogListData {
+	List  []BlogItem `json:"list"`
+	Total int64      `json:"total"`
+}
+
+type BlogListResponse {
+	Response
+	Data *BlogListData `json:"data,omitempty"`
+}
+
+type BlogReadRequest {
+	Slug string `path:"slug"` // alias 或 id
+}
+
+type BlogReadResponse {
+	Response
+	Data *BlogItem `json:"data,omitempty"`
+}
+
+type BlogAdminGetRequest {
+	Id int64 `json:"id"`
+}
+
+type BlogAdminCreateRequest {
+	Title       string `json:"title"`
+	Alias       string `json:"alias,optional"` // 别名，唯一
+	Summary     string `json:"summary,optional"`
+	Content     string `json:"content"`
+	Tags        string `json:"tags,optional"`
+	Categories  string `json:"categories,optional"`
+	Authors     string `json:"authors,optional"`
+	Banner      string `json:"banner,optional"`
+	IsPublished int64  `json:"isPublished,optional"` // 0/1
+}
+
+type BlogAdminUpdateRequest {
+	Id          int64  `json:"id"`
+	Title       string `json:"title"`
+	Alias       string `json:"alias,optional"` // 别名，唯一
+	Summary     string `json:"summary,optional"`
+	Content     string `json:"content"`
+	Tags        string `json:"tags,optional"`
+	Categories  string `json:"categories,optional"`
+	Authors     string `json:"authors,optional"`
+	Banner      string `json:"banner,optional"`
+	IsPublished int64  `json:"isPublished,optional"` // 0/1
+}
+
+type BlogAdminDeleteRequest {
+	Id int64 `json:"id"`
+}
+
+// ==================== 删除Client ====================
+
+
+// ==================== API路由定义 ====================
+@server (
+	prefix:     /api/knowsource
+	group:      knowsource
+	timeout:    60s
+)
+service fca-api {
+	@doc "员工登录"
+	@handler KnowsourceLogin
+	post /login (KnowsourceLoginRequest) returns (KnowsourceLoginResponse)
+
+
+
+	@doc "员工登录"
+	@handler KnowsourceOALogin
+	post /oa/login (KnowsourceOALoginRequest) returns (KnowsourceLoginResponse)
+
+	@doc "租户自助注册（创建 client + superadmin，发邮箱验证码）"
+	@handler KnowsourceTenantRegister
+	post /tenant/register (KnowsourceTenantRegisterRequest) returns (KnowsourceTenantRegisterResponse)
+
+	@doc "租户邮箱验证通过"
+	@handler KnowsourceTenantVerifyEmail
+	post /tenant/verify-email (KnowsourceTenantVerifyEmailRequest) returns (Response)
+
+	@doc "租户发送邮箱验证码"
+	@handler KnowsourceTenantSendVerificationCode
+	post /tenant/send-verification-code (KnowsourceTenantSendVerificationCodeRequest) returns (Response)
+
+	@doc "忘记密码：发送验证码（邮箱或手机）"
+	@handler KnowsourcePasswordResetSendCode
+	post /password/reset/send-code (KnowsourcePasswordResetSendCodeRequest) returns (Response)
+
+	@doc "忘记密码：验证码重置"
+	@handler KnowsourcePasswordResetConfirm
+	post /password/reset/confirm (KnowsourcePasswordResetConfirmRequest) returns (Response)
+
+	@doc "标注文档已转化"
+	@handler MarkDocumentConverted
+	post /mark/document/converted (MarkDocumentConvertedRequest) returns (Response)
+
+		@doc "标注文档已转化"
+	@handler MarkDocumentRaged
+	post /mark/document/raged (MarkDocumentRagedRequest) returns (Response)
+
+	@doc "公开博客列表（无需登录）"
+	@handler BlogListPublic
+	post /blog/list (BlogListPublicRequest) returns (BlogListResponse)
+
+	@doc "公开博客详情（通过 alias 或 id，无需登录）"
+	@handler BlogRead
+	get /blog/:slug (BlogReadRequest) returns (BlogReadResponse)
+
+}
+
+type AdminChangeFileDocumentTypeRequest {
+	FileName string `json:"fileName"`
+	OldDocumentCode string `json:"oldDocumentCode"`
+	NewDocumentCode string `json:"newDocumentCode"`
+}
+
+// sys/check 各依赖服务状态
+type SysCheckItem {
+	Ok       bool     `json:"ok"`                 // 是否可访问
+	Value    string   `json:"value"`              // 配置值/地址（脱敏可选）
+	Message  string   `json:"message"`            // 错误信息或 ok 时的说明
+	ModelIds []string `json:"modelIds,optional"`  // vLLM /v1/models 返回的 model id 列表（仅 vllm* 服务有值）
+	Type     string   `json:"type,optional"`      // 服务类型：ollama 或 vllm（仅 completion 类服务有值）
+	Version  string   `json:"version,optional"`    // 版本号（如 0.1，仅支持 /api/version 或 /version 的服务有值）
+}
+type SysCheckData {
+	Vllmchat     SysCheckItem `json:"vllmchat"`
+	Vllmembedding SysCheckItem `json:"vllmembedding"`
+	Vllmreranker  SysCheckItem `json:"vllmreranker"`
+	Qdrant       SysCheckItem `json:"qdrant"`
+	Redis        SysCheckItem `json:"redis"`
+	Mysql        SysCheckItem `json:"mysql"`
+	Mineru       SysCheckItem `json:"mineru"`
+	Mail         SysCheckItem `json:"mail"`
+}
+type SysCheckResponse {
+	Response
+	Data *SysCheckData `json:"data,omitempty"`
+}
+
+// ==================== AI 调用统计 ====================
+type AiCallStatsQueryRequest {
+	StartTime string `json:"startTime"` // 开始时间，格式 2006-01-02 或 2006-01-02 15:04:05
+	EndTime   string `json:"endTime"`   // 结束时间，格式 2006-01-02 或 2006-01-02 15:04:05
+}
+
+type AiCallStatsQueryData {
+	TotalCount  int64    `json:"totalCount"`  // 调用总次数
+	UserCount   int64    `json:"userCount"`   // 去重用户数
+	ModelCount  int64    `json:"modelCount"`  // 模型种类数
+	AvgCostMs   float64  `json:"avgCostMs"`   // 平均耗时（毫秒）
+	SumQuestionCharCount int64 `json:"sumQuestionCharCount"` // 问题总字数
+	SumOutputCharCount   int64 `json:"sumOutputCharCount"`   // 输出总字数
+	ModelNames  []string `json:"modelNames"`  // 模型名称列表（可选，便于前端展示）
+}
+
+type AiCallStatsQueryResponse {
+	Response
+	Data *AiCallStatsQueryData `json:"data,omitempty"`
+}
+
+// ==================== 系统统计 ====================
+type SystemStatsResponse {
+	Response
+	Data *SystemStatsData `json:"data,omitempty"`
+}
+
+type SystemStatsData {
+	EmpCount     int64 `json:"empCount"`     // 员工总数
+	DeptCount    int64 `json:"deptCount"`    // 部门总数
+	DocumentCount int64 `json:"documentCount"` // 知识库总数
+	SessionCount  int64 `json:"sessionCount"`  // AI 会话数
+}
+
+@server (
+	prefix:     /api/knowsource
+	group:      knowsource
+	middleware: Auth
+	timeout:    120s
+)
+service fca-api {
+	@doc "convert document to markdown"
+	@handler ConvertDocumentToMD
+	post /document/convert/to/md (ConvertDocumentToMDRequest) returns (ConvertDocumentToMDResponse)
+
+
+	@doc "convert document to zip"
+	@handler ConvertDocumentToZIP
+	post /document/convert/to/zip (ConvertDocumentToMDRequest) returns (ConvertDocumentToZIPResponse)
+
+	@doc "cancel convert task"
+	@handler CancelConvertDocument
+	post /document/convert/cancel (CancelConvertDocumentRequest) returns (Response)
+
+	@doc "list async tasks for current tenant"
+	@handler ListAsyncTask
+	post /async-task/list (ListAsyncTaskRequest) returns (ListAsyncTaskResponse)
+
+	@doc "cancel async task for current tenant"
+	@handler CancelAsyncTask
+	post /async-task/cancel (CancelAsyncTaskRequest) returns (Response)
+
+	@doc "delete async task for current tenant"
+	@handler DeleteAsyncTask
+	post /async-task/delete (DeleteAsyncTaskRequest) returns (Response)
+
+	@doc "async_task 变更水印（按租户 Redis），前端轮询与本地比较，有变化再拉列表"
+	@handler GetAsyncTaskWatermark
+	post /async-task/watermark (GetAsyncTaskWatermarkRequest) returns (GetAsyncTaskWatermarkResponse)
+
+}
+@server (
+	prefix:     /api/knowsource
+	group:      knowsource
+	middleware: Auth
+	timeout:    60s
+)
+
+service fca-api {
+
+	@doc "刷新token"
+	@handler RefreshToken
+	post /refresh/token  returns (KnowsourceLoginResponse)
+
+	@doc "绑定手机/邮箱：发送验证码"
+	@handler KnowsourceContactBindSend
+	post /profile/contact/bind/send (KnowsourceContactBindSendRequest) returns (Response)
+
+	@doc "绑定手机/邮箱：提交验证码"
+	@handler KnowsourceContactBindConfirm
+	post /profile/contact/bind/confirm (KnowsourceContactBindConfirmRequest) returns (Response)
+
+    @doc "admin 重置密码"
+	@handler AdminResetPassword
+	post /admin/reset/password (AdminResetPasswordRequest) returns (Response)
+
+    @doc "admin 重置密码"
+	@handler AdminSetRole
+	post /admin/set/role (AdminSetRoleRequest) returns (Response)
+
+	@doc "admin 移动文件到其他文档类型"
+	@handler AdminChangeFileDocumentType
+	post /admin/change/file/document-type (AdminChangeFileDocumentTypeRequest) returns (Response)
+
+	@doc "admin 创建 client"
+	@handler AdminClientCreate
+	post /admin/client/create (AdminClientCreateRequest) returns (Response)
+
+	@doc "admin 删除 client"
+	@handler AdminClientDelete
+	post /admin/client/delete (AdminClientDeleteRequest) returns (Response)
+
+	@doc "管理员：获取Client列表"
+	@handler AdminClientList
+	post /admin/client/list (AdminClientListRequest) returns (AdminClientListResponse)
+
+ 
+
+	@doc "修改密码"
+	@handler KnowsourceChangePassword
+	post /change-password (KnowsourceChangePasswordRequest) returns (Response)
+
+	@doc "创建员工知识库权限"
+	@handler CreateEmpDocumentType
+	post /emp-document-type/create (KnowsourceEmpDocumentTypeRequest) returns (Response)
+
+	@doc "删除员工知识库权限"
+	@handler DeleteEmpDocumentType
+	post /emp-document-type/delete (KnowsourceEmpDocumentTypeDeleteRequest) returns (Response)
+
+	@doc "获取员工知识库权限列表"
+	@handler ListEmpDocumentType
+	post /emp-document-type/list (KnowsourceEmpDocumentTypeListRequest) returns (KnowsourceEmpDocumentTypeListResponse)
+
+    @doc "获取员工知识库权限列表group"
+	@handler ListEmpDocumentTypeListGroupList
+	post /emp-document-type/list/group (KnowsourceEmpDocumentTypeListRequest) returns (KnowsourceEmpDocumentTypeListGroupResponse)
+
+
+	@doc "创建部门文档类型绑定"
+	@handler CreateDeptDocumentType
+	post /dept-document-type/create (KnowsourceDeptDocumentTypeRequest) returns (Response)
+
+	@doc "删除部门文档类型绑定"
+	@handler DeleteDeptDocumentType
+	post /dept-document-type/delete (KnowsourceDeptDocumentTypeDeleteRequest) returns (Response)
+
+	@doc "获取部门文档类型绑定列表"
+	@handler ListDeptDocumentType
+	post /dept-document-type/list (KnowsourceDeptDocumentTypeListRequest) returns (KnowsourceDeptDocumentTypeListResponse)
+
+	@doc "获取员工列表"
+	@handler ListEmp
+	post /emp/list (KnowsourceEmpListRequest) returns (KnowsourceEmpListResponse)
+
+	@doc "新增员工"
+	@handler CreateEmp
+	post /emp/create (KnowsourceEmpCreateRequest) returns (Response)
+
+	@doc "修改员工"
+	@handler UpdateEmp
+	post /emp/update (KnowsourceEmpUpdateRequest) returns (Response)
+
+	@doc "删除员工"
+	@handler DeleteEmp
+	post /emp/delete (KnowsourceEmpDeleteRequest) returns (Response)
+
+	@doc "获取部门列表"
+	@handler ListDept
+	post /dept/list (KnowsourceDeptListRequest) returns (KnowsourceDeptListResponse)
+
+	@doc "新增部门"
+	@handler CreateDept
+	post /dept/create (KnowsourceDeptCreateRequest) returns (Response)
+
+	@doc "修改部门"
+	@handler UpdateDept
+	post /dept/update (KnowsourceDeptUpdateRequest) returns (Response)
+
+	@doc "删除部门"
+	@handler DeleteDept
+	post /dept/delete (KnowsourceDeptDeleteRequest) returns (Response)
+
+	@doc "移动部门（拖拽）"
+	@handler MoveDept
+	post /dept/move (KnowsourceDeptMoveRequest) returns (Response)
+
+	@doc "获取部门树"
+	@handler GetDeptTree
+	post /dept/tree (KnowsourceDeptTreeRequest) returns (KnowsourceDeptTreeResponse)
+
+	@doc "获取我的文档类型"
+	@handler ListMyDocumentType
+	post /my-document-type/list   returns (KnowsourceMyDocumentTypeListResponse)
+
+	@doc "获取文档路径文件树"
+	@handler GetDocPathTree
+	post /doc-path/tree (KnowsourceDocPathTreeRequest) returns (KnowsourceDocPathTreeResponse)
+
+
+	@doc "获取 qrdant collection list"
+	@handler GetQdrantCollectionList
+	post /qdrant/collection/list (QdrantCollectionListRequest) returns (QdrantCollectionListResponse)
+
+	@doc "获取 qrdant collection list"
+	@handler GetQdrantCollectionFileList
+	post /qdrant/collection/file/list (QdrantCollectionFileListRequest) returns (QdrantCollectionFileListResponse)
+
+	 // setting
+	@doc "获取设置"
+	@handler LoadLLMSetting
+	post /llm/setting/load    returns (LLMSettingResponse)
+
+	@doc "更新设置"
+	@handler SaveLLMSetting
+	post /llm/setting/save (LLMSettingData) returns (LLMSettingResponse)
+
+	@doc "获取 LLM 设置系统默认值（来自 knowsource.yaml，供界面重置，不写入租户配置）"
+	@handler LoadLLMSettingDefaults
+	post /llm/setting/defaults returns (LLMSettingResponse)
+
+	@doc "获取对话模型列表（与监控检查中 Chat 使用同一接口 /v1/models 或 Ollama /api/tags），排除名称含 embedding 的模型"
+	@handler GetLLMChatModels
+	post /llm/chat/models returns (LLMChatModelsResponse)
+
+	@doc "获取 Embedding 模型列表（从 Rag.EmbeddingsUrl 拉取），仅返回名称含 embedding 的模型"
+	@handler GetLLMEmbeddingModels
+	post /llm/embedding/models returns (LLMChatModelsResponse)
+
+	@doc "测试 Embedding 与 Rerank 实际调用（租户覆盖配置）"
+	@handler TestLLMServices
+	post /llm/service/test (LLMServiceTestRequest) returns (LLMServiceTestResponse)
+
+	@doc "sync mysql"
+	@handler SyncMysql
+	post /sync/mysql  returns (Response)
+
+	@doc "系统依赖检查：Vllmchat、Vllmembedding、Vllmreranker、Qdrant、Redis、Mysql"
+	@handler SysCheck
+	post /sys/check returns (SysCheckResponse)
+
+	@doc "AI 调用统计：按时间范围查询，返回总次数、人数、模型数量"
+	@handler AiCallStatsQuery
+	post /ai/call/stats/query (AiCallStatsQueryRequest) returns (AiCallStatsQueryResponse)
+
+	@doc "系统统计：返回员工总数、部门总数、知识库总数、AI 会话数"
+	@handler GetSystemStats
+	post /system/stats returns (SystemStatsResponse)
+
+	@doc "update dify option"
+	@handler UpdateDifyOption
+	post /dify/option/update (GetDifyOptionData) returns (Response)
+
+
+	@doc "get dify option"
+	@handler GetDifyOption
+	post /dify/option/get (GetDifyOptionReq) returns (GetDifyOptionResponse)
+
+	@doc "get dify option"
+	@handler CreateDifyOption
+	post /dify/option/create (GetDifyOptionData) returns (Response)
+
+	@doc "List dify option"
+	@handler ListDifyOption
+	post /dify/option/list  returns (GetDifyOptionListResponse)
+
+	@doc "Delete dify option"
+	@handler DeleteDifyOption
+	post /dify/option/delete (GetDifyOptionReq) returns (Response)
+
+	@doc "import hr user dept"
+	@handler ImportHrUserDept
+	post /hr/import/user/dept returns (Response)
+
+	// ==================== 角色管理 CRUD ====================
+	@doc "创建角色"
+	@handler CreateFrRole
+	post /role/create (FrRoleCreateRequest) returns (Response)
+
+	@doc "获取角色"
+	@handler GetFrRole
+	post /role/get (FrRoleGetRequest) returns (FrRoleGetResponse)
+
+	@doc "更新角色"
+	@handler UpdateFrRole
+	post /role/update (FrRoleUpdateRequest) returns (Response)
+
+	@doc "删除角色"
+	@handler DeleteFrRole
+	post /role/delete (FrRoleDeleteRequest) returns (Response)
+
+	@doc "获取角色列表"
+	@handler ListFrRole
+	post /role/list (FrRoleListRequest) returns (FrRoleListResponse)
+
+	// ==================== 权限管理 CRUD ====================
+	@doc "创建权限"
+	@handler CreateFrPermission
+	post /permission/create (FrPermissionCreateRequest) returns (Response)
+
+	@doc "获取权限"
+	@handler GetFrPermission
+	post /permission/get (FrPermissionGetRequest) returns (FrPermissionGetResponse)
+
+	@doc "更新权限"
+	@handler UpdateFrPermission
+	post /permission/update (FrPermissionUpdateRequest) returns (Response)
+
+	@doc "删除权限"
+	@handler DeleteFrPermission
+	post /permission/delete (FrPermissionDeleteRequest) returns (Response)
+
+	@doc "获取权限列表"
+	@handler ListFrPermission
+	post /permission/list (FrPermissionListRequest) returns (FrPermissionListResponse)
+
+	// ==================== 用户角色关联 CRUD ====================
+	@doc "创建用户角色关联"
+	@handler CreateFrUserRole
+	post /user-role/create (FrUserRoleCreateRequest) returns (Response)
+
+	@doc "获取用户角色关联"
+	@handler GetFrUserRole
+	post /user-role/get (FrUserRoleGetRequest) returns (FrUserRoleGetResponse)
+
+	@doc "更新用户角色关联"
+	@handler UpdateFrUserRole
+	post /user-role/update (FrUserRoleUpdateRequest) returns (Response)
+
+	@doc "删除用户角色关联"
+	@handler DeleteFrUserRole
+	post /user-role/delete (FrUserRoleDeleteRequest) returns (Response)
+
+	@doc "获取用户角色关联列表"
+	@handler ListFrUserRole
+	post /user-role/list (FrUserRoleListRequest) returns (FrUserRoleListResponse)
+
+	// ==================== 角色权限关联 CRUD ====================
+	@doc "创建角色权限关联"
+	@handler CreateFrRolePermission
+	post /role-permission/create (FrRolePermissionCreateRequest) returns (Response)
+
+	@doc "获取角色权限关联"
+	@handler GetFrRolePermission
+	post /role-permission/get (FrRolePermissionGetRequest) returns (FrRolePermissionGetResponse)
+
+	@doc "更新角色权限关联"
+	@handler UpdateFrRolePermission
+	post /role-permission/update (FrRolePermissionUpdateRequest) returns (Response)
+
+	@doc "删除角色权限关联"
+	@handler DeleteFrRolePermission
+	post /role-permission/delete (FrRolePermissionDeleteRequest) returns (Response)
+
+	@doc "获取角色权限关联列表"
+	@handler ListFrRolePermission
+	post /role-permission/list (FrRolePermissionListRequest) returns (FrRolePermissionListResponse)
+
+	@doc "创建标签"
+	@handler CreateFrTag
+	post /tag/create (FrTagCreateRequest) returns (Response)
+
+	@doc "获取标签"
+	@handler GetFrTag
+	post /tag/get (FrTagGetRequest) returns (FrTagGetResponse)
+
+	@doc "更新标签"
+	@handler UpdateFrTag
+	post /tag/update (FrTagUpdateRequest) returns (Response)
+
+	@doc "删除标签"
+	@handler DeleteFrTag
+	post /tag/delete (FrTagDeleteRequest) returns (Response)
+
+	@doc "获取标签列表"
+	@handler ListFrTag
+	post /tag/list (FrTagListRequest) returns (FrTagListResponse)
+
+	@doc "博客管理列表（仅 admin 租户 superadmin）"
+	@handler BlogAdminList
+	post /blog/admin/list (BlogAdminListRequest) returns (BlogListResponse)
+
+	@doc "博客管理详情（仅 admin 租户 superadmin）"
+	@handler BlogAdminGet
+	post /blog/admin/get (BlogAdminGetRequest) returns (BlogReadResponse)
+
+	@doc "博客管理创建（仅 admin 租户 superadmin）"
+	@handler BlogAdminCreate
+	post /blog/admin/create (BlogAdminCreateRequest) returns (Response)
+
+	@doc "博客管理更新（仅 admin 租户 superadmin）"
+	@handler BlogAdminUpdate
+	post /blog/admin/update (BlogAdminUpdateRequest) returns (Response)
+
+	@doc "博客管理删除（仅 admin 租户 superadmin）"
+	@handler BlogAdminDelete
+	post /blog/admin/delete (BlogAdminDeleteRequest) returns (Response)
+}
+
+type GetDifyOptionReq {
+	Name string `json:"name,optional"`
+}
+type GetDifyOptionListResponse {
+	Response
+	Data *GetDifyOptionListData `json:"data,omitempty"`
+}
+type GetDifyOptionListData {
+	List []GetDifyOptionData `json:"list"`
+	Total int64 `json:"total"`
+}
+
+type GetDifyOptionResponse {
+	Response
+	Data *GetDifyOptionData `json:"data,omitempty"`
+}
+
+type  GetDifyOptionData {
+	Name string `json:"name"` 
+	Url string `json:"url"`
+	ApiKey string `json:"apiKey"`
+	Description string `json:"description,optional"`
+}
+
+type ConvertDocumentToMDRequest {
+	Id int64 `json:"id"` // 文档ID
+}
+
+// 取消文档转换任务（识别文字中断）
+type CancelConvertDocumentRequest {
+	Id int64 `json:"id"` // 文档ID
+}
+
+type ConvertDocumentToMDResponse {
+	Response
+	Data *ConvertDocumentToMDData `json:"data,omitempty"`
+}
+
+type ConvertDocumentToMDData {
+	Id int64 `json:"id"`
+	FileName string `json:"fileName"`
+	Content string `json:"content"` // Markdown 内容
+}
+
+type ConvertDocumentToZIPResponse {
+	Response
+	Data *ConvertDocumentToZIPData `json:"data,omitempty"`
+}
+
+type ConvertDocumentToZIPData {
+	Id int64 `json:"id"`
+	FileName string `json:"fileName"`
+	ZipFilePath string `json:"zipFilePath"` // ZIP 文件保存路径
+	ExtractedDir string `json:"extractedDir"` // 解压后的目录路径
+	FileList []string `json:"fileList"` // 解压后的文件列表
+}
+
+// ==================== async_task 队列查询 ====================
+type ListAsyncTaskRequest {
+	TaskType string `json:"taskType,optional"` // 任务类型筛选
+	Status   string `json:"status,optional"`   // 空=全部状态；指定则精确匹配 init/running/canceled/success/failed
+	PageRequest
+}
+
+type AsyncTaskItem {
+	Id            int64  `json:"id"`
+	ClientId      string `json:"clientId"`
+	TaskType      string `json:"taskType"`
+	TaskDesc      string `json:"taskDesc"`
+	SourceId      int64  `json:"sourceId"`
+	SourceKey     string `json:"sourceKey"`
+	ExecuteResult string `json:"executeResult,optional"`
+	Status        string `json:"status"`
+	CreatedAt     int64  `json:"createdAt"`
+	UpdatedAt     int64  `json:"updatedAt"`
+}
+
+type ListAsyncTaskData {
+	List  []AsyncTaskItem `json:"list"`
+	Total int64           `json:"total"`
+}
+
+type ListAsyncTaskResponse {
+	Response
+	Data *ListAsyncTaskData `json:"data,omitempty"`
+}
+
+type CancelAsyncTaskRequest {
+	Id int64 `json:"id"` // async_task.id
+}
+
+type DeleteAsyncTaskRequest {
+	Id int64 `json:"id"` // async_task.id
+}
+
+type GetAsyncTaskWatermarkRequest {
+}
+
+type GetAsyncTaskWatermarkData {
+	Watermark string `json:"watermark"` // Unix 纳秒时间戳字符串；尚无变更记录时为空
+}
+
+type GetAsyncTaskWatermarkResponse {
+	Response
+	Data *GetAsyncTaskWatermarkData `json:"data,omitempty"`
+}
+
+//max size和模型推理  temperature、top_k、top_p、repeat_penalty；RAG 检索与重排参数
+type LLMSettingData {
+	MaxTokens int64 `json:"maxSize"`
+	Model string `json:"model"`
+	CompletionUrl string `json:"completionUrl,optional"`
+	CompletionApiKey string `json:"completionApiKey,optional"`
+	CompletionType string `json:"completionType,optional"`
+	EmbeddingModel string `json:"embeddingModel,optional"`
+	EmbeddingsUrl string `json:"embeddingsUrl,optional"`
+	EmbeddingsApiKey string `json:"embeddingsApiKey,optional"`
+	EmbeddingsType string `json:"embeddingsType,optional"`
+	RerankerUrl string `json:"rerankerUrl,optional"`
+	RerankerApiKey string `json:"rerankerApiKey,optional"`
+	RerankerType string `json:"rerankerType,optional"`
+	RerankerModel string `json:"rerankerModel,optional"`
+	Temperature float64 `json:"temperature"`
+	TopK int64 `json:"topK"`
+	TopP float64 `json:"topP"`
+	RepeatPenalty float64 `json:"repeatPenalty,optional"`
+	// RAG：向量检索 TopK、相似度底线、重排 TopK、重排分值底线
+	RagEmbeddingTopK       int64   `json:"ragEmbeddingTopK,optional"`
+	RagSimilarityThreshold float64 `json:"ragSimilarityThreshold,optional"`
+	// RAG：概要检索（summary collection）阈值；为空/未配置时默认沿用 RagSimilarityThreshold
+	RagSummarySimilarityThreshold float64 `json:"ragSummarySimilarityThreshold,optional"`
+	RagRerankTopK          int64   `json:"ragRerankTopK,optional"`
+	RagRerankScoreThreshold float64 `json:"ragRerankScoreThreshold,optional"`
+	// RAG：概要检索（summary collection）重排分值阈值；为空/未配置时默认沿用 RagRerankScoreThreshold
+	RagSummaryRerankScoreThreshold float64 `json:"ragSummaryRerankScoreThreshold,optional"`
+}
+type LLMSettingResponse {
+	Response
+	Data *LLMSettingData `json:"data,omitempty"`
+}
+
+type LLMChatModelsData {
+	ModelIds []string `json:"modelIds"`
+}
+type LLMChatModelsResponse {
+	Response
+	Data *LLMChatModelsData `json:"data,omitempty"`
+}
+
+type LLMServiceTestRequest {
+	Query string `json:"query,optional"`
+	Doc1  string `json:"doc1,optional"`
+	Doc2  string `json:"doc2,optional"`
+}
+
+type LLMServiceTestData {
+	EmbeddingOk        bool      `json:"embeddingOk"`
+	EmbeddingDimension int64     `json:"embeddingDimension"`
+	EmbeddingError     string    `json:"embeddingError,optional"`
+	RerankOk           bool      `json:"rerankOk"`
+	RerankTopScore     float64   `json:"rerankTopScore,optional"`
+	RerankScores       []float64 `json:"rerankScores,optional"`
+	RerankError        string    `json:"rerankError,optional"`
+}
+
+type LLMServiceTestResponse {
+	Response
+	Data *LLMServiceTestData `json:"data,omitempty"`
+}
+ 
+type QdrantCollectionFileListRequest {
+	Collection string `json:"collection"`
+}
+type QdrantCollectionFileListResponse {
+	Response
+	Data *QdrantCollectionFileListData `json:"data,omitempty"`
+}
+type QdrantCollectionFileListData {
+	List []QdrantCollectionFileInfo `json:"list"`
+	Total int64 `json:"total"`
+}
+type QdrantCollectionFileInfo {
+	Id string `json:"id"`
+	FileName string `json:"fileName"`
+	DocumentCode string `json:"documentCode"`
+	Content string `json:"content,optional"`
+	Metadata string `json:"metadata,optional"`
+	Page int64 `json:"page"`
+	TotalPages int64 `json:"totalPages"`
+	Length int64 `json:"length"`
+}
+type QdrantCollectionListRequest {	
+}
+type QdrantCollectionListResponse {
+	Response
+	Data *QdrantCollectionListData `json:"data,omitempty"`
+}
+type QdrantCollectionListData {
+	List []string `json:"list"`
+	Total int64 `json:"total"`
+}
+
+type MarkDocumentRagedRequest {
+	Authorization string `json:"Authorization,optional"`
+	RawDocumentFileNames []RawDocumentInfo `json:"rawDocumentFileNames"`
+}
+
+type MarkDocumentConvertedRequest {
+	Authorization string `json:"Authorization,optional"`
+	RawDocumentFileNames []RawDocumentInfo `json:"rawDocumentFileNames"`
+}
+type RawDocumentInfo {
+	ClientId string `json:"clientId"`
+	FileName string `json:"fileName"`
+	DocumentCode string `json:"documentCode"`
+	Content string `json:"content,optional"`
+}
+
+type KnowsourceMyDocumentTypeListResponse {
+	Response
+	Data *KnowsourceMyDocumentTypeListData `json:"data,omitempty"`
+}
+
+type KnowsourceMyDocumentTypeListData {
+	List  []KnowsourceMyDocumentTypeInfo `json:"list"`
+	Total int64                      `json:"total"`
+}
+
+type KnowsourceMyDocumentTypeInfo {
+	DeptName string `json:"deptName"`
+	
+	DocumentTypeCode string `json:"documentTypeCode"`
+	DocumentTypeName string `json:"documentTypeName"`
+	IsDisabled int64 `json:"isDisabled,optional"`
+	Description string `json:"description,optional"`
+}
+
+// ==================== 文档路径文件树相关 ====================
+type KnowsourceDocPathTreeRequest {
+	Path string `json:"path,optional"` // 路径（可选，默认为根路径）
+}
+
+type KnowsourceDocPathTreeResponse {
+	Response
+	Data *KnowsourceDocPathTreeData `json:"data,omitempty"`
+}
+
+type KnowsourceDocPathTreeData {
+	Tree []KnowsourceDocPathTreeNode `json:"tree"`
+}
+
+type KnowsourceDocPathTreeNode {
+	Name     string                `json:"name"`     // 文件或目录名称
+	Path     string                `json:"path"`     // 完整路径
+	IsDir    bool                  `json:"isDir"`    // 是否为目录
+	Size     int64                 `json:"size"`     // 文件大小（目录为0）
+	Children []KnowsourceDocPathTreeNode `json:"children"` // 子节点列表
+}
+
+// ==================== 角色管理相关 ====================
+type FrRoleCreateRequest {
+	Role string `json:"role"` // 角色编码
+	Name string `json:"name"` // 角色名称/描述
+}
+
+type FrRoleGetRequest {
+	Role string `json:"role"` // 角色编码
+}
+
+type FrRoleGetResponse {
+	Response
+	Data *FrRoleInfo `json:"data,omitempty"`
+}
+
+type FrRoleInfo {
+	Role string `json:"role"` // 角色编码
+	Name string `json:"name"` // 角色名称/描述
+}
+
+type FrRoleUpdateRequest {
+	Role string `json:"role"` // 角色编码
+	Name string `json:"name"` // 角色名称/描述
+}
+
+type FrRoleDeleteRequest {
+	Role string `json:"role"` // 角色编码
+}
+
+type FrRoleListRequest {
+	PageRequest
+	Role string `json:"role,optional"` // 角色编码（可选，用于筛选）
+	Name string `json:"name,optional"` // 角色名称（可选，用于筛选）
+}
+
+type FrRoleListResponse {
+	Response
+	Data *FrRoleListData `json:"data,omitempty"`
+}
+
+type FrRoleListData {
+	List  []FrRoleInfo `json:"list"`
+	Total int64        `json:"total"`
+}
+
+// ==================== 权限管理相关 ====================
+type FrPermissionCreateRequest {
+	Permission  string `json:"permission"`  // 权限编码
+	Description string `json:"description"` // 权限描述
+}
+
+type FrPermissionGetRequest {
+	Permission string `json:"permission"` // 权限编码
+}
+
+type FrPermissionGetResponse {
+	Response
+	Data *FrPermissionInfo `json:"data,omitempty"`
+}
+
+type FrPermissionInfo {
+	Permission  string `json:"permission"`  // 权限编码
+	Description string `json:"description"` // 权限描述
+}
+
+type FrPermissionUpdateRequest {
+	Permission  string `json:"permission"`  // 权限编码
+	Description string `json:"description"` // 权限描述
+}
+
+type FrPermissionDeleteRequest {
+	Permission string `json:"permission"` // 权限编码
+}
+
+type FrPermissionListRequest {
+	PageRequest
+	Permission  string `json:"permission,optional"`  // 权限编码（可选，用于筛选）
+	Description string `json:"description,optional"` // 权限描述（可选，用于筛选）
+}
+
+type FrPermissionListResponse {
+	Response
+	Data *FrPermissionListData `json:"data,omitempty"`
+}
+
+type FrPermissionListData {
+	List  []FrPermissionInfo `json:"list"`
+	Total int64              `json:"total"`
+}
+
+// ==================== 用户角色关联相关 ====================
+type FrUserRoleCreateRequest {
+	EmpCode string `json:"empCode"` // 员工编码
+	Role    string `json:"role"`    // 角色编码
+}
+
+type FrUserRoleGetRequest {
+	Id uint64 `json:"id"` // 关联ID
+}
+
+type FrUserRoleGetResponse {
+	Response
+	Data *FrUserRoleInfo `json:"data,omitempty"`
+}
+
+type FrUserRoleInfo {
+	Id      uint64 `json:"id"`      // 关联ID
+	EmpCode string `json:"empCode"` // 员工编码
+	Role    string `json:"role"`    // 角色编码
+}
+
+type FrUserRoleUpdateRequest {
+	Id      uint64 `json:"id"`      // 关联ID
+	EmpCode string `json:"empCode"` // 员工编码
+	Role    string `json:"role"`    // 角色编码
+}
+
+type FrUserRoleDeleteRequest {
+	Id uint64 `json:"id"` // 关联ID
+}
+
+type FrUserRoleListRequest {
+	PageRequest
+	EmpCode string `json:"empCode,optional"` // 员工编码（可选，用于筛选）
+	Role    string `json:"role,optional"`    // 角色编码（可选，用于筛选）
+}
+
+type FrUserRoleListResponse {
+	Response
+	Data *FrUserRoleListData `json:"data,omitempty"`
+}
+
+type FrUserRoleListData {
+	List  []FrUserRoleInfo `json:"list"`
+	Total int64            `json:"total"`
+}
+
+// ==================== 角色权限关联相关 ====================
+type FrRolePermissionCreateRequest {
+	Role       string `json:"role"`       // 角色编码
+	Permission string `json:"permission"` // 权限编码
+}
+
+type FrRolePermissionGetRequest {
+	Id uint64 `json:"id"` // 关联ID
+}
+
+type FrRolePermissionGetResponse {
+	Response
+	Data *FrRolePermissionInfo `json:"data,omitempty"`
+}
+
+type FrRolePermissionInfo {
+	Id         uint64 `json:"id"`         // 关联ID
+	Role       string `json:"role"`       // 角色编码
+	Permission string `json:"permission"` // 权限编码
+}
+
+type FrRolePermissionUpdateRequest {
+	Id         uint64 `json:"id"`         // 关联ID
+	Role       string `json:"role"`       // 角色编码
+	Permission string `json:"permission"` // 权限编码
+}
+
+type FrRolePermissionDeleteRequest {
+	Id uint64 `json:"id"` // 关联ID
+}
+
+type FrRolePermissionListRequest {
+	PageRequest
+	Role       string `json:"role,optional"`       // 角色编码（可选，用于筛选）
+	Permission string `json:"permission,optional"` // 权限编码（可选，用于筛选）
+}
+
+type FrRolePermissionListResponse {
+	Response
+	Data *FrRolePermissionListData `json:"data,omitempty"`
+}
+
+type FrRolePermissionListData {
+	List  []FrRolePermissionInfo `json:"list"`
+	Total int64                  `json:"total"`
+}
+
+// ==================== 文档标签管理 ====================
+type FrTagCreateRequest {
+	Tag string `json:"tag"` // 标签名称
+}
+
+type FrTagGetRequest {
+	Tag string `json:"tag"` // 标签名称
+}
+
+type FrTagGetResponse {
+	Response
+	Data *FrTagInfo `json:"data,omitempty"`
+}
+
+type FrTagInfo {
+	Tag string `json:"tag"` // 标签名称
+}
+
+type FrTagUpdateRequest {
+	OldTag string `json:"oldTag"` // 旧标签名称
+	NewTag string `json:"newTag"` // 新标签名称
+}
+
+type FrTagDeleteRequest {
+	Tag string `json:"tag"` // 标签名称
+}
+
+type FrTagListRequest {
+	PageRequest
+	Tag string `json:"tag,optional"` // 标签名称（可选，用于筛选）
+}
+
+type FrTagListResponse {
+	Response
+	Data *FrTagListData `json:"data,omitempty"`
+}
+
+type FrTagListData {
+	List  []FrTagInfo `json:"list"`
+	Total int64       `json:"total"`
+}

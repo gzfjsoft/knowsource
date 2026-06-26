@@ -1,0 +1,132 @@
+syntax = "v1"
+
+info (
+	title:   "KnowSource API"
+	desc:    "API for KnowSource"
+	author:  "Chenyongtao / Peter / Chenreal / "
+	email:   "xxxxxxxx@163.com"
+	version: "v1.0.1"
+	filename: "fca-filemanager.api"
+)
+
+type FileItem {
+    Id          uint64 `json:"id"`
+    Name        string `json:"name"`
+    Path        string `json:"path"`
+    IsDirectory bool   `json:"isDirectory"`
+    Size        int64  `json:"size"`
+    CreatedAt   uint64 `json:"createdAt"`
+    UpdatedAt   uint64 `json:"updatedAt"`
+}
+
+type ListDirectoryRequest {
+    Path string `json:"path"`
+    IsAllFile int64 `json:"isAllFile,optional"`
+    PageRequest
+}
+
+type ListDirectoryResponse {
+    Response
+    Data *ListDirectoryResponseData `json:"data,omitempty"`
+}
+
+type ListDirectoryResponseData {
+    Files []FileItem `json:"files"`
+    Total uint64     `json:"total"`
+    CurrentPath string `json:"currentPath"`
+}
+
+type SearchFilesRequest {
+    Query string `json:"query"`           // Search term
+    Path  string `json:"path,optional"`   // Optional: limit search to specific directory
+    PageRequest
+}
+
+type SearchFilesResponse {
+    Response
+    Data *SearchFilesResponseData `json:"data,omitempty"`
+}
+
+type SearchFilesResponseData {
+    Files []FileItem `json:"files"`
+    Total uint64     `json:"total"`
+}
+
+type NavigateDirectoryRequest {
+    Path string `json:"path"`    // Target directory path
+}
+
+type GetFilePartialMD5Request {
+    Path string `json:"path"`    // Target file path
+}
+
+type GetFilePartialMD5Response {
+    Response
+    MD5 string `json:"md5"`
+}
+type FileGetRequest {
+	File string `path:"file"`
+}
+
+type FileApplyRequest {
+	File string `json:"file"`
+}
+
+
+type FileLikeRequest {
+	File string `json:"file"`
+    Degree int64 `json:"degree"`
+}
+
+type FileReadRequest {
+	File string `json:"file"`
+}
+
+type ApplyResponse {
+    Code string `json:"code"`
+}
+
+
+@server (
+    
+    prefix: /api/v1
+    
+    group: files
+    timeout: 120s
+)
+
+service fca-api {
+  
+} 
+@server (
+    jwt: Auth
+    prefix: /api/v1
+    middleware: AuthInterceptor
+    group: files
+    timeout: 15s
+)
+
+
+service fca-api {
+    @handler ListDirectoryHandler
+    post /directory/list (ListDirectoryRequest) returns (ListDirectoryResponse)
+    
+    @handler SearchFilesHandler
+    post /files/search (SearchFilesRequest) returns (SearchFilesResponse)
+    
+    @handler NavigateDirectoryHandler
+    post /directory/navigate (NavigateDirectoryRequest) returns (ListDirectoryResponse)
+
+    @handler GetFilePartialMD5Handler
+    post /files/partialmd5 (GetFilePartialMD5Request) returns (GetFilePartialMD5Response)
+
+    @handler FileLikeHandler
+    post /files/like (FileLikeRequest) returns (Response)
+
+    @handler FileApplyHandler
+    post /files/apply (FileApplyRequest) returns (ApplyResponse)
+
+    @handler FileReadHandler
+    post /files/read (FileReadRequest) returns (Response)
+
+}

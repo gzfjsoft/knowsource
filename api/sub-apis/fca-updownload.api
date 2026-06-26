@@ -1,0 +1,164 @@
+syntax = "v1"
+
+info(
+    title: "Upload Download API"
+    desc: "文件上传下载和身份证验证服务API"
+    author: "PeterSZW"
+    version: "1.0"
+    filename: "fca-updownload.api"
+)
+
+type DownloadRequest {
+	File string `path:"file"`
+}
+
+type UploadResponse {
+	Response
+	Filename string `json:"filename"`
+	//Code int `json:"code"`
+}
+type VerifyRequest {
+	IdcardFront string `json:"idcard_front"`
+	IdcardBack  string `json:"idcard_back"`
+	Name        string `json:"name"`
+	Idcard      string `json:"idcard"`
+}
+type GetVerifyIdcardRequest {
+	
+}
+type GetVerifyIdcardData {
+	Id          uint64  `json:"id"`
+	IdcardFront string `json:"idcard_front"`
+	IdcardBack  string `json:"idcard_back"`
+	Name        string `json:"name"`
+	Idcard      string `json:"idcard"`
+}
+type GetVerifyIdcardResponse {
+	Response
+	Data *GetVerifyIdcardData `json:"data,optional"`
+	
+}
+type GetVerifyIdcardListRequest {
+	Page int64 `json:"page"`
+	PageSize int64 `json:"page_size"`
+}
+type GetVerifyIdcardListResponse {
+	Response
+	Data  *GetVerifyIdcardListData`json:"data"`
+	
+}
+
+type GetVerifyIdcardListData {
+	 List []GetVerifyIdcardListDataItem `json:"list"`
+	 Total int64 `json:"total"`
+}
+
+
+// UserAuthIdcard struct {
+// 		Id               uint64         `db:"id"`
+// 		UserId           int64          `db:"user_id"`
+// 		ReqName          string         `db:"req_name"`       // 用户输入姓名
+// 		ReqIdcardNum     string         `db:"req_idcard_num"` // 用户输入身份证号
+// 		ImageFront       string         `db:"image_front"`
+// 		ImageBack        string         `db:"image_back"`
+// 		AuditStatus      int64          `db:"audit_status"` // 1:审核中，2：审核通过，3：审核未通过，0：未上传审核
+// 		FailReason       sql.NullString `db:"fail_reason"`
+// 		State            int64          `db:"state"`
+// 		CreatedAt        time.Time      `db:"created_at"`
+// 		UpdatedAt        time.Time      `db:"updated_at"`
+// 		Address          string         `db:"Address"`
+// 		Birthday         string         `db:"birthday"`
+// 		ValidityPeriod   string         `db:"validity_period"`
+// 		Name             string         `db:"name"`              // 身份证姓名
+// 		Gender           int64          `db:"gender"`            // 身份证性别
+// 		IssuingAuthority string         `db:"issuing_authority"` // 发证机关
+// 		Ethnicity        string         `db:"ethnicity"`         // 民族
+// 		IdcardNum        string         `db:"idcard_num"`        // 身份证号
+// 		AuditUserId      uint64         `db:"audit_user_id"`     // 审核人ID
+// 		AuditAt          time.Time      `db:"audit_at"`          // 审核时间
+// 	}
+
+type GetVerifyIdcardListDataItem {
+	Id          uint64  `json:"id"`
+	UserId      int64   `json:"user_id"`
+	ReqName     string  `json:"req_name"`
+	ReqIdcardNum string  `json:"req_idcard_num"`
+	ImageFront string  `json:"image_front"`
+	ImageBack string  `json:"image_back"`
+	AuditStatus int64   `json:"audit_status"`
+	FailReason string  `json:"fail_reason"`
+	State int64   `json:"state"`
+	CreatedAt   int64   `json:"created_at"`
+	UpdatedAt   int64   `json:"updated_at"`
+	Address string  `json:"address"`
+	Birthday string  `json:"birthday"`
+	ValidityPeriod string  `json:"validity_period"`
+	Name string  `json:"name"`
+	Gender int64   `json:"gender"`
+	IssuingAuthority string  `json:"issuing_authority"`
+	Ethnicity string  `json:"ethnicity"`
+	IdcardNum string  `json:"idcard_num"`
+	AuditUserId uint64  `json:"audit_user_id"`
+	AuditAt     int64   `json:"audit_at"`
+
+}
+
+@server (
+	prefix:     /api/v1
+	timeout:    15s
+)
+
+service fca-api {
+	@handler DownloadHandler
+	get /file/static/:file(DownloadRequest)
+
+	
+}
+
+@server (
+	jwt:        Auth
+	prefix:     /api/v1
+	middleware: AuthInterceptor
+	timeout:    60s
+)
+service fca-api {
+
+	@handler UploadHandler
+	post /upload returns (UploadResponse)
+
+	@handler UploadIdcardFrontHandler
+	post /upload/idcard/front returns (UploadResponse)
+
+	@handler UploadIdcardBackHandler
+	post /upload/idcard/back returns (UploadResponse)
+
+
+	@handler VerifyIdcardHandler
+	post /idcard/verify (VerifyRequest) returns (Response)
+
+	@handler GetVerifyIdcardHandler
+	post /idcard/verify/get (GetVerifyIdcardRequest) returns (GetVerifyIdcardResponse)
+}
+
+type AdminAduitIdcardRequest {
+	Id uint64 `json:"id"`
+	AuditStatus int64 `json:"audit_status"`
+	FailReason string `json:"fail_reason"`
+}
+
+
+@server (
+	jwt:        Auth
+	prefix:     /api/v1
+	middleware: AuthInterceptor
+	group:      admin
+	timeout:    60s
+)
+service fca-api {
+
+	@handler GetVerifyIdcardListHandler
+	post /admin/idcard/verify/list (GetVerifyIdcardListRequest) returns (GetVerifyIdcardListResponse)
+
+	@handler AdminAduitIdcardHandler
+	post /admin/idcard/audit (	AdminAduitIdcardRequest) returns (Response)
+}

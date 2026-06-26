@@ -1,0 +1,38 @@
+syntax = "v1"
+
+info(
+    title: "MySQL Backup API"
+    desc: "MySQL mysqldump 备份（zip）与下载"
+    author: "PeterSZW"
+    version: "1.0"
+    filename: "fca-mysql-backup.api"
+)
+
+type (
+    MysqlBackupData {
+        FileName string `json:"fileName"` // 备份 zip 文件名（不含路径），供下载接口使用
+    }
+    MysqlBackupResponse {
+        Response
+        Data *MysqlBackupData `json:"data,omitempty"`
+    }
+    MysqlBackupDownloadRequest {
+        File string `path:"file"`
+    }
+)
+
+@server (
+    prefix:     /api/v1
+    timeout:    600s
+    middleware: Auth
+    group:      mysql
+)
+service fca-api {
+    @doc "执行 mysqldump 并打包为 zip（仅 admin 租户且 superadmin 角色）"
+    @handler MysqlBackup
+    post /mysql/backup returns (MysqlBackupResponse)
+
+    @doc "下载备份 zip（仅 admin 租户且 superadmin 角色）"
+    @handler MysqlBackupDownload
+    get /mysql/download/backup/:file (MysqlBackupDownloadRequest) returns (Response)
+}

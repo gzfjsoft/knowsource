@@ -1,0 +1,37 @@
+syntax = "v1"
+
+info (
+	title:    "KnowSource API"
+	desc:     "API for KnowSource"
+	author:   "Chenyongtao / Peter / Chenreal / "
+	email:    "xxxxxxxx@163.com"
+	version:  "v1.0.1"
+	filename: "fca.api"
+)
+
+type Response {
+	Code    int64  `json:"code"`
+	Message string `json:"message"`
+	Info    string `json:"info,omitempty"`
+}
+
+type PageRequest {
+	Page     uint64 `json:"page,optional"`
+	PageSize uint64 `json:"pageSize,optional"`
+}
+
+// 分页请求
+type PageFormRequest {
+	Page     uint64 `form:"page,default=1"`
+	PageSize uint64 `form:"pageSize,default=10"`
+}
+
+import "fca-knowdata.api"
+import "sub-apis/fca-updownload.api"
+import "sub-apis/fca-mysql-backup.api"
+import "sub-apis/fca-ai.api"
+import "sub-apis/fca-filemanager.api"
+import "sub-apis/fca-html.api"
+import "knowsource-use.api"
+import "../knowdata/knowsource-doc.api"
+import "knowsource.api"

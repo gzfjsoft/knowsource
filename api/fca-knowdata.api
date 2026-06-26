@@ -1,0 +1,1000 @@
+syntax = "v1"
+
+info (
+	title:    "FCA KnowSource API"
+	desc:     "API for FCA KnowSource"
+	author:   " Peter  "
+	email:    "xxxxxxxx@163.com"
+	version:  "v1.0.1"
+	filename: "fca-xxx.api"
+)
+
+ 
+
+
+type CreateTransactionRecordsRequest {
+	UserId       uint64 `json:"userId"`
+	OrgId        uint64 `json:"orgId"`
+	TransType    uint64 `json:"transType"`
+	PayType      string `json:"payType"`
+	CurrencyCode string `json:"currencyCode"`
+	Detail       string `json:"detail"`
+	OrderNo      string `json:"orderNo"`
+	Amount       int64  `json:"amount"`
+	Balance      int64  `json:"balance"`
+}
+type HelloRequest {
+	Name string `path:"name,options=you|me"`
+}
+ 
+
+type RestPassRequest {
+	// OldPassword string `json:"oldPassword"`
+	NewPassword string `json:"newPassword"`
+}
+
+type Org {
+	OrgId     uint64 `json:"orgId"`
+	OrgName   string `json:"orgName"`
+	IsPrivate uint64 `json:"isPrivate"`
+	Role      string `json:"role"`
+}
+
+type LoginRequest {
+	ClientId  string `json:"clientId"` // 平台id
+	Username  string `json:"username,optional"`
+	Email     string `json:"email,optional"`
+	Password  string `json:"password"`
+	Captcha   string `json:"captcha"`
+	CaptchaId string `json:"captchaId"`
+}
+
+type LoginResponse {
+	Response
+	Data *LoginResponseData `json:"data,omitempty"`
+}
+
+type LoginResponseData {
+	AccessToken  string `json:"accessToken"`
+	AccessExpire int64  `json:"accessExpire"`
+	Uuid         string `json:"uuid"`
+	Avatar       string `json:"avatar"`
+	Username     string `json:"username"`
+	Nickname     string `json:"nickname"`
+	SysRole      string `json:"sysRole"`
+	Orgs         []Org  `json:"orgs"`
+}
+
+type RegisterRequest {
+	Username  string `json:"username"`
+	Nickname  string `json:"nickname,optional"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone,optional"`
+	Password  string `json:"password"`
+	Captcha   string `json:"captcha"`
+	CaptchaId string `json:"captchaId"`
+}
+
+type SendphonecodeRequest {
+	Phonenum  string `json:"phonenum"`
+	Captcha   string `json:"captcha"`
+	CaptchaId string `json:"captchaId"`
+}
+
+type SendemailcodeRequest {
+	Email     string `json:"email"`
+	Type      string `json:"type,optional"` //register
+	Captcha   string `json:"captcha"`
+	CaptchaId string `json:"captchaId"`
+}
+
+type EmailcodeloginRequest {
+	ClientId string `json:"clientId"` // 平台id
+	Email string `json:"email"`
+	Code  string `json:"code"`
+}
+
+type VerifyEmailRequest {
+	Email string `path:"email"`
+	Code  string `path:"code"`
+}
+
+type ResendEmailRequest {
+	Email string `json:"email"`
+}
+
+type PhonecodeloginRequest {
+	ClientId string `json:"clientId"` // 平台id
+	Phonenum string `json:"phonenum"`
+	Code     string `json:"code"`
+}
+
+type RegisterResponse {
+	Response
+	Data RegisterResponseData `json:"data,omitempty"`
+}
+
+type RegisterResponseData {
+	UserId   uint64 `json:"userId"`
+	Username string `json:"username"`
+	Nickname string `json:"nickname"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+	Orgs     []Org  `json:"orgs"`
+}
+
+type UserResponse {
+	Response
+	Data UserResponseData `json:"data,omitempty"`
+}
+
+type UserResponseData {
+	UserId          uint64 `json:"userId"`
+	Username        string `json:"username"`
+	Nickname        string `json:"nickname"`
+	Phone           string `json:"phone"`
+	Email           string `json:"email"`
+	HeadUrl         string `json:"headUrl"`
+	SysRole         string `json:"sysRole"`
+	IsDeleted       int64  `json:"isDeleted"`
+	CreatedAt       uint64 `json:"createdAt"`
+	Orgs            []Org  `json:"orgs,omitempty"`
+	IsPhoneVerified int64  `json:"isPhoneVerified"`
+	IsEmailVerified int64  `json:"isEmailVerified"`
+	Uuid            string `json:"uuid"`
+	Avatar          string `json:"avatar"`
+	LoginedAt       uint64 `json:"loginedAt"`
+}
+
+type UserBalance {
+	OrgId        uint64 `json:"orgId"`
+	OrgName      string `json:"orgName"`
+	CurrencyCode string `json:"currencyCode"`
+	Balance      int64  `json:"balance"`
+}
+
+// New admin user management types
+type AdminUserDeleteRequest {
+	// UserId uint64 `json:"userId" validate:"required"`
+	UserIds []uint64 `json:"userIds"`
+// Email  string `json:"email,optional"`
+}
+
+type AdminUserListRequest {
+	Username string `json:"username,optional"`
+	Email    string `json:"email,optional"`
+	Phone    string `json:"phone,optional"`
+	PageRequest
+}
+
+type AdminUserBalanceRequest {
+	UserId uint64 `json:"userId"`
+}
+
+type AdminUserBalanceResponse {
+	Response
+	Data *AdminUserBalanceResponseData `json:"data,omitempty"`
+}
+
+type AdminUserBalanceResponseData {
+	UserBalance []UserBalance `json:"userBalance"`
+}
+
+type AdminUserListResponse {
+	Response
+	Data AdminUserListResponseData `json:"data,omitempty"`
+}
+
+type AdminUserUpdateRequest {
+	UserId    uint64 `json:"userId"`
+	Username  string `json:"username,optional"`
+	Nickname  string `json:"nickname,optional"`
+	Phone     string `json:"phone,optional"`
+	Email     string `json:"email,optional"`
+	IsDeleted uint64 `json:"isDeleted,optional"`
+	SysRole   string `json:"sysRole,optional"`
+}
+
+type AdminUserListResponseData {
+	Users []UserResponseData `json:"users"`
+	Total uint64             `json:"total"`
+}
+
+type ServerListRequest {
+	RegionId     int      `json:"regionId,optional"`
+	TagId        int      `json:"tagId,optional"`
+	IsPayMin     int      `json:"isPayMin,optional"`
+	IsPayDaily   int      `json:"isPayDaily,optional"`
+	IsPayMonthly int      `json:"isPayMonthly,optional"`
+	IsPayYearly  int      `json:"isPayYearly,optional"`
+	GpuModel     []string `json:"gpuModel,optional"`
+	GpuCount     int      `json:"gpuCount,optional"`
+	GpuMem       int      `json:"gpuMem,optional"`
+	CpuModel     []string `json:"cpuModel,optional"`
+	CpuCores     int      `json:"cpuCores,optional"`
+	Supplier     int      `json:"supplier,optional"`
+	PageRequest
+}
+
+type ServerListDataResp {
+	Servers   []Server `json:"servers"`
+	PageIndex int      `json:"pageIndex"`
+	PageSize  int      `json:"pageSize"`
+	Offset    int      `json:"offset"`
+	MaxPage   int      `json:"maxPage"`
+	Total     int      `json:"total"`
+	Page      int      `json:"page"`
+}
+
+type ServerListResponse {
+	Response
+	Data *ServerListDataResp `json:"data,omitempty"`
+}
+
+type Server {
+	ServerId uint64 `json:"serverId,optional"`
+	ServerBaseField
+}
+
+type ServerBaseField {
+	// ServerId       uint64 `json:"serverId"`
+	RegionId         uint64 `json:"regionId"`
+	ServerName       string `json:"serverName"`
+	Supplier         uint64 `json:"supplier"`
+	GpuModel         string `json:"gpuModel"`
+	GpuMem           uint64 `json:"gpuMem"`
+	GpuCount         uint64 `json:"gpuCount"`
+	GpuUsed          int64  `json:"gpuUsed"` // 已使用GPU数量
+	CpuModel         string `json:"cpuModel"`
+	CpuFrequency     int64  `json:"cpuFrequency"`
+	CpuCores         uint64 `json:"cpuCores"`
+	CpuCount         uint64 `json:"cpuCount"`
+	Memory           uint64 `json:"memory"`
+	SystemDisk       uint64 `json:"systemDisk,optional"`
+	DataDisk         uint64 `json:"dataDisk,optional"`
+	MaxDataDisk      uint64 `json:"maxDataDisk,optional"`
+	SpeedDesc        string `json:"speedDesc,optional"`
+	GpuDriver        string `json:"gpuDriver,optional"`
+	CudaVersion      string `json:"cudaVersion,optional"`
+	OsName           string `json:"osName,optional"`
+	OsVersion        string `json:"osVersion,optional"`
+	KernelVersion    string `json:"kernelVersion,optional"`
+	DockerVersion    string `json:"dockerVersion,optional"`
+	NvidiaDocker     int64  `json:"nvidiaDocker,optional"`
+	NetworkDownSpeed int64  `json:"networkDownSpeed,optional"`
+	NetworkUpSpeed   int64  `json:"networkUpSpeed,optional"`
+	AgentVersion     string `json:"agentVersion,optional"`
+	PayPrices        string `json:"payPrices,optional"`
+	Available        uint64 `json:"available"`
+	Total            uint64 `json:"total"`
+	ExpireDate       uint64 `json:"expireDate"`
+	ThreadCount      uint64 `json:"threadCount"`
+	IsOnline         int64  `json:"isOnline,optional"`
+	IsPayMin         int64  `json:"isPayMin,optional"`
+	IsPayDaily       int64  `json:"isPayDaily,optional"`
+	IsPayMonthly     int64  `json:"isPayMonthly,optional"`
+	IsPayYearly      int64  `json:"isPayYearly,optional"`
+	IsDeleted        int64  `json:"isDeleted,optional"`
+	PerGpuMemory     uint64 `json:"perGpuMemory,optional"`
+	PerGpuDisksize   uint64 `json:"perGpuDisksize,optional"`
+	PerGpuCpuCore    uint64 `json:"perGpuCpuCore,optional"`
+	FcbUrl           string `json:"fcbUrl,optional"`
+}
+
+//  RegionId         uint64 `json:"regionId"`
+//  Supplier         uint64 `json:"supplier"`
+//  GpuModel         string `json:"gpuModel"`
+//  GpuMem           uint64 `json:"gpuMem"`
+//  GpuCount         uint64 `json:"gpuCount"`
+//  CpuModel         string `json:"cpuModel"`
+//  CpuFrequency     int64  `json:"cpuFrequency"`
+//  CpuCores         uint64 `json:"cpuCores"`
+//  CpuCount         uint64 `json:"cpuCount"`
+//  Memory           uint64 `json:"memory"`
+//  GpuDriver        string `json:"gpuDriver"`
+//  CudaVersion      string `json:"cudaVersion"`
+//  Available        uint64 `json:"available"`
+//  Total            uint64 `json:"total"`
+//  ExpireDate       uint64 `json:"expireDate"`
+//  IsOnline         int64  `json:"isOnline,optional"`
+//  IsPayMin         int64  `json:"isPayMin,optional"`
+//  IsPayDaily       int64  `json:"isPayDaily,optional"`
+//  IsPayMonthly     int64  `json:"isPayMonthly,optional"`
+//  IsPayYearly      int64  `json:"isPayYearly,optional"`
+// ServerId         uint64    `db:"serverId"`
+//         ServerName       string    `db:"server_name"`
+//         IsOnline         int64     `db:"is_online"`
+//         BillingMethod    uint64    `db:"billing_method"` // 计费方式
+//         RegionId         uint64    `db:"region_id"`      // 地区
+//         IsPayMin         int64     `db:"is_pay_min"`
+//         IsPayDaily       int64     `db:"is_pay_daily"`
+//         IsPayMonthly     int64     `db:"is_pay_monthly"`
+//         IsPayYearly      int64     `db:"is_pay_yearly"`
+//         PayPrices        string    `db:"pay_prices"`
+//         DiskPayPrices    string    `db:"disk_pay_prices"`
+//         Supplier         uint64    `db:"supplier"`           // 供应商
+//         Processor        uint64    `db:"processor"`          // 处理器类型
+//         GpuModel         uint64    `db:"gpu_model"`          // GPU型号
+//         GpuCount         uint64    `db:"gpu_count"`          // GPU数量
+//         GpuUsed          int64     `db:"gpu_used"`           // 已使用GPU数量
+//         GpuMem           uint64    `db:"gpu_mem"`            // 显存
+//         CpuModel         uint64    `db:"cpu_model"`          // CPU型号
+//         CpuCores         uint64    `db:"cpu_cores"`          // CPU核数
+//         CpuFrequency     int64     `db:"cpu_frequency"`      // cpu频率
+//         ThreadCount      uint64    `db:"thread_count"`       // 处理器线程数量
+//         Memory           uint64    `db:"memory"`             // 内存(GB)
+//         SystemDisk       uint64    `db:"system_disk"`        // 系统盘(GB)
+//         DataDisk         uint64    `db:"data_disk"`          // 数据盘(GB)
+//         MaxDataDisk      uint64    `db:"max_data_disk"`      // 最大数据盘(GB)
+//         SpeedDesc        string    `db:"speed_desc"`         // 运算速度
+//         OsName           string    `db:"os_name"`            // 操作系统名称
+//         OsVersion        string    `db:"os_version"`         // 操作系统版本号
+//         KernelVersion    string    `db:"kernel_version"`     // 内核版本
+//         GpuDriver        string    `db:"gpu_driver"`         // GPU驱动
+//         CudaVersion      string    `db:"cuda_version"`       // cuda版本
+//         DockerVersion    string    `db:"docker_version"`     // Docker版本号
+//         NvidiaDocker     int64     `db:"nvidia_docker"`      // 是否支持nvidia-docker
+//         NetworkDownSpeed int64     `db:"network_down_speed"` // 网络下载速度
+//         NetworkUpSpeed   int64     `db:"network_up_speed"`   // 网络上传速度
+//         AgentVersion     string    `db:"agent_version"`      // 代理版本号
+//         Cost             uint64    `db:"cost"`               // 费用
+//         Available        uint64    `db:"available"`          // 空闲数量
+//         Total            uint64    `db:"total"`              // 可用总量
+//         ExpireDate       time.Time `db:"expire_date"`        // 到期时间
+//         CreatedAt        time.Time `db:"created_at"`
+//         UpdatedAt        time.Time `db:"updated_at"`
+// Ip            uint64 `json:"ip,optional"` // Optional: IP address
+// Port          string `json:"port,optional"` // Optional: Port number
+// ContainerPort string `json:"containerPort,optional"` // Optional: Container port number
+// GpuCores      uint64 `json:"gpuCores,optional"` // Optional: Number of GPU cores
+// Memory        uint64 `json:"memory,optional"` // Optional: Amount of memory
+// DiskPath      string `json:"diskPath,optional"` // Optional: Disk path
+// Cost          uint64 `json:"cost,optional"` // Optional: Cost
+// MountPath     string `json:"mountPath,optional"` // Optional: Mount path// Ip            uint64 `json:"ip,optional"` // Optional: IP address
+// Port          string `json:"port,optional"` // Optional: Port number
+// ContainerPort string `json:"containerPort,optional"` // Optional: Container port number
+// GpuCores      uint64 `json:"gpuCores,optional"` // Optional: Number of GPU cores
+// Memory        uint64 `json:"memory,optional"` // Optional: Amount of memory
+// DiskPath      string `json:"diskPath,optional"` // Optional: Disk path
+// Cost          uint64 `json:"cost,optional"` // Optional: Cost
+// MountPath     string `json:"mountPath,optional"` // Optional: Mount path
+type TransactionRecordsListRequest {
+	OrgId          uint64 `json:"orgId,optional"`
+	TransType      uint64 `json:"transType,optional"`
+	CurrencyCode   string `json:"currencyCode,optional"`
+	BeginCreatedAt uint64 `json:"beginCreatedAt,optional"`
+	EndCreatedAt   uint64 `json:"endCreatedAt,optional"`
+	OrderNo        string `json:"orderNo,optional"`
+	PageRequest
+}
+
+type TransactionRecords {
+	Id           uint64 `json:"id"`
+	UserId       uint64 `json:"userId"`
+	OrgId        uint64 `json:"orgId"`
+	CreatedAt    uint64 `json:"createdAt"`
+	TransType    uint64 `json:"transType"`
+	PayType      string `json:"payType"`
+	CurrencyCode string `json:"currencyCode"`
+	Detail       string `json:"detail"`
+	OrderNo      string `json:"orderNo"`
+	Username     string `json:"username"`
+	Amount       int64  `json:"amount"`
+	Balance      int64  `json:"balance"`
+}
+
+type TransactionRecordsListResponse {
+	Response
+	Data TransactionRecordsListResponseData `json:"data,omitempty"`
+}
+
+type TransactionRecordsListResponseData {
+	Trans []TransactionRecords `json:"trans"`
+	Total int                  `json:"total"`
+}
+
+// New struct for captcha response
+type CaptchaResponse {
+	Response
+	Data CaptchaResponseData `json:"data,omitempty"`
+}
+
+type CaptchaResponseData {
+	CaptchaId   string `json:"captchaId"`
+	ImageBase64 string `json:"imageBase64"`
+}
+
+// 邀请用户到组织
+// 加用户到组织
+// 用户申请加入组织
+// 用户离开组织
+
+type UserBalanceResponse {
+	Response
+	Data []UserBalance `json:"data,omitempty"`
+}
+// type UserBalanceData {
+//  UserId       uint64 `json:"userId"`
+//  Balance      int64  `json:"balance"`
+//  CurrencyCode string `json:"currencyCode"`
+// }
+// region 相关
+type BindPhoneRequest {
+	Phone string `json:"phone"`
+	Code  string `json:"code"`
+}
+
+type BindEmailRequest {
+	Email string `json:"email"`
+	Code  string `json:"code"`
+}
+
+@server (
+	prefix:  /api/v1
+	timeout: 60s
+)
+service fca-api {
+	@handler SendemailcodeHandler
+	post /user/sendemailcode (SendemailcodeRequest) returns (Response) //ok
+}
+
+@server (
+	prefix:  /api/v1
+	timeout: 15s
+)
+service fca-api {
+	//测试服务器相关
+	@handler HelloHandler
+	get /sys/hello/:name (HelloRequest) returns (Response) //ok
+
+	@handler InfoHandler
+	get /sys/info returns (Response) //ok
+
+	@handler PingHandler
+	get /sys/ping returns (Response) //ok
+
+	//用户注册登录相关
+	@handler CaptchaHandler
+	get /user/captcha returns (CaptchaResponse) //ok
+
+	@handler RegisterHandler
+	post /user/register (RegisterRequest) returns (RegisterResponse) //ok
+
+	@handler LoginHandler
+	post /user/login (LoginRequest) returns (LoginResponse) //ok
+
+	@handler SendphonecodeHandler
+	post /user/sendphonecode (SendphonecodeRequest) returns (Response) //ok
+
+	@handler PhonecodeloginHandler
+	post /user/phonecodelogin (PhonecodeloginRequest) returns (LoginResponse) //ok,成功就直接登录
+
+	@handler EmailcodeloginHandler
+	post /user/emailcodelogin (EmailcodeloginRequest) returns (LoginResponse) //ok,成功就直接登录
+
+	@handler VerifyEmailHandler
+	get /user/verify/email/:email/:code (VerifyEmailRequest) returns (Response) //ok,成功就直接登录
+
+	@handler ResendEmailHandler
+	get /user/resend/email (ResendEmailRequest) returns (Response) //ok,成功就直接登录
+
+}
+
+@server (
+	jwt:        Auth
+	prefix:     /api/v1
+	middleware: AuthInterceptor
+	timeout:    60s
+	foo:        bar
+)
+service fca-api {
+
+}
+
+@server (
+	jwt: Auth
+	// 路由前缀
+	// 如果 key 固定为 "prefix:"
+	// 则代表路由前缀声明，value 则为具体的路由前缀值，字符串中没让必须以 / 开头
+	prefix: /api/v1
+	// 路由分组
+	// 如果 key 固定为 "group:"，则代表路由分组声明
+	// value 则为具体分组名称，在 goctl生成代码后会根据此值进行文件夹分组
+	//--- group: Foo
+	// 中间件
+	// 如果 key 固定为 middleware:"，则代表中间件声明
+	// value 则为具体中间件函数名称，在 goctl生成代码后会根据此值进生成对应的中间件函数
+	middleware: AuthInterceptor
+	// 超时控制
+	// 如果 key 固定为  timeout:"，则代表超时配置
+	// value 则为具体中duration，在 goctl生成代码后会根据此值进生成对应的超时配置
+	timeout: 15s
+	// 其他 key-value，除上述几个内置 key 外，其他 key-value
+	// 也可以在作为 annotation 信息传递给 goctl 及其插件，但就
+	// 目前来看，goctl 并未使用。
+	foo: bar
+)
+service fca-api {
+	@handler BindPhoneHandler
+	post /user/bind/phone (BindPhoneRequest) returns (Response) //ok
+
+	@handler BindEmailHandler
+	post /user/bind/email (BindEmailRequest) returns (Response) //ok
+
+	@handler KeepLoginHandler
+	post /user/keeplogin returns (LoginResponse) //ok
+
+	// 系统相关
+	@handler KeepAliveHandler
+	get /user/keepalive returns (Response) //ok
+
+	@handler BeMemberHandler
+	post /user/bemember returns (Response) //ok
+
+	@handler AdminServerListHandler
+	post /admin/server/list (ServerListRequest) returns (ServerListResponse)
+
+	//admin 控制user功能
+	// 完成 AdminUserDelete 逻辑，如果ID>0和email ，就用两个一起查，如果只有单个，就单个查询
+	@handler AdminUserDeleteHandler
+	post /admin/user/delete (AdminUserDeleteRequest) returns (Response) //OK
+
+	@handler AdminUserListHandler
+	post /admin/user/list (AdminUserListRequest) returns (AdminUserListResponse) //OK
+
+	@handler AdminUserBalanceHandler
+	post /admin/user/balance (AdminUserBalanceRequest) returns (AdminUserBalanceResponse) //OK
+
+	@handler AdminUserUpdateHandler
+	post /admin/user/update (AdminUserUpdateRequest) returns (Response) //OK
+
+	@handler AdminInstanceChargeDeletedHandler
+	post /admin/instance/charge/deleted returns (Response) //OK
+
+	@handler UserUpdateHandler
+	post /user/update (AdminUserUpdateRequest) returns (Response) //OK
+
+
+	// 用户信息相关
+	@handler ResetPassHandler
+	post /user/resetpass (RestPassRequest) returns (Response) //ok
+
+	@handler UserHandler
+	post /user/info returns (UserResponse) //ok
+
+	@handler UpdateUserInfoHandler
+	post /user/info/update (UpdateUserInfoRequest) returns (Response) //ok
+
+	// 财务信息相关
+	@handler ListTransactionRecordsHandler
+	post /transactions/list (TransactionRecordsListRequest) returns (TransactionRecordsListResponse)
+
+	@handler ListOrderRecordsHandler
+	post /orders/list (OrderRecordsListRequest) returns (OrderRecordsListResponse)
+
+	@handler AdminListOrderRecordsHandler
+	post /admin/orders/list (AdminOrderRecordsListRequest) returns (OrderRecordsListResponse)
+
+	// User-side APIs
+	@handler GetUserBalanceHandler
+	get /user/balance returns (UserBalanceResponse)
+
+
+
+}
+
+//gen by claude
+type UpdateUserInfoRequest {
+	Username        string `json:"username,optional"`
+	Email           string `json:"email,optional"`
+	Phone           string `json:"phone,optional"`
+	Nickname        string `json:"nickname,optional"`
+	IsPhoneVerified int64  `json:"isPhoneVerified,optional"`
+	IsEmailVerified int64  `json:"isEmailVerified,optional"`
+// Balance  int64  `json:"balance,optional"`
+}
+
+// type Bucket {
+//  Name         string `json:"name"`
+//  CreationDate uint64 `json:"creationDate"`
+//  RegionName       string `json:"regionName"`
+// }
+type OrderRecordsListRequest {
+	// UserId         uint64 `json:"userId"`
+	OrderType      uint   `json:"orderType,optional"`
+	BeginCreatedAt uint64 `json:"beginCreatedAt,optional"`
+	EndCreatedAt   uint64 `json:"endCreatedAt,optional"`
+	OrderNo        string `json:"orderNo,optional"`
+	PageRequest
+}
+
+type AdminOrderRecordsListRequest {
+	UserId         uint64 `json:"userId,optional"`
+	OrderType      uint   `json:"orderType,optional"`
+	BeginCreatedAt uint64 `json:"beginCreatedAt,optional"`
+	EndCreatedAt   uint64 `json:"endCreatedAt,optional"`
+	OrderNo        string `json:"orderNo,optional"`
+	PageRequest
+}
+
+type OrderRecordsListResponse {
+	Response
+	Data OrderRecordsListResponseData `json:"data,omitempty"`
+}
+
+type OrderRecordsListResponseData {
+	Orders []OrderRecords `json:"orders"`
+	Total  int            `json:"total"`
+}
+
+type OrderRecords {
+	Id            uint64 `json:"id"`
+	OrderNo       string `json:"orderNo"`
+	InstanceId    uint64 `json:"instanceId"`
+	RunningTime   uint64 `json:"runningTime"`
+	CreatedAt     uint64 `json:"createdAt"`
+	BillingMethod uint64 `json:"billingMethod"`
+	OrderAmount   uint64 `json:"orderAmount"`
+	Discount      uint64 `json:"discount"`
+	ActualAmount  uint64 `json:"actualAmount"`
+	UserId        uint64 `json:"userId"`
+	OrderType     uint64 `json:"orderType"`
+}
+
+///
+// ... (previous content remains unchanged until the end) ...
+// Role and Permission Management Types
+type Role {
+	Id          uint64 `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   int64  `json:"createdAt"`
+	UpdatedAt   int64  `json:"updatedAt"`
+}
+
+type Permission {
+	Id   uint64 `json:"id"`
+	Name string `json:"name"`
+	// Code        string `json:"code"`
+	Description string `json:"description"`
+	CreatedAt   int64  `json:"createdAt"`
+// UpdatedAt   int64  `json:"updatedAt"`
+}
+
+type CreateRoleRequest {
+	Name        string   `json:"name" validate:"required"`
+	Description string   `json:"description"`
+	Permissions []string `json:"permissions"`
+}
+
+type UpdateRoleRequest {
+	Id          uint64   `json:"id" validate:"required"`
+	Name        string   `json:"name,optional"`
+	Description string   `json:"description,optional"`
+	Permissions []string `json:"permissions,optional"` // Permission IDs
+}
+
+type RoleResponse {
+	Response
+	Data Role `json:"data,omitempty"`
+}
+
+type GetRoleResponse {
+	Response
+	Data GetRoleResponseData `json:"data,omitempty"`
+}
+
+type GetRoleResponseData {
+	Role        Role         `json:"role"`
+	Permissions []Permission `json:"permissions"`
+}
+
+type RoleListRequest {
+	Name string `json:"name,optional"`
+	PageRequest
+}
+
+type RoleListResponse {
+	Response
+	Data RoleListResponseData `json:"data,omitempty"`
+}
+
+type RoleListResponseData {
+	Roles []Role `json:"roles"`
+	Total uint64 `json:"total"`
+}
+
+type CreatePermissionRequest {
+	Name        string `json:"name" validate:"required"`
+	Code        string `json:"code" validate:"required"`
+	Description string `json:"description"`
+}
+
+type UpdatePermissionRequest {
+	Id          uint64 `json:"id" validate:"required"`
+	Name        string `json:"name,optional"`
+	Code        string `json:"code,optional"`
+	Description string `json:"description,optional"`
+}
+
+type PermissionResponse {
+	Response
+	Data Permission `json:"data,omitempty"`
+}
+
+type PermissionListRequest {
+	Name string `json:"name,optional"`
+	Code string `json:"code,optional"`
+	PageRequest
+}
+
+type PermissionListResponse {
+	Response
+	Data PermissionListResponseData `json:"data,omitempty"`
+}
+
+type PermissionListResponseData {
+	Permissions []Permission `json:"permissions"`
+	Total       uint64       `json:"total"`
+}
+
+type AssignRoleRequest {
+	UserId uint64 `json:"userId" validate:"required"`
+	RoleId uint64 `json:"roleId" validate:"required"`
+}
+
+type UserRolesResponse {
+	Response
+	Data UserRolesResponseData `json:"data,omitempty"`
+}
+
+type UserRolesResponseData {
+	Roles []Role `json:"roles"`
+}
+
+type DeleteRoleRequest {
+	Id uint64 `json:"id"`
+}
+
+type GetRoleRequest {
+	// Id uint64 `json:"id"`
+	Id uint64 `json:"id"`
+}
+
+type DeletePermissionRequest {
+	Id uint64 `json:"id"`
+}
+
+type GetpermissionRequest {
+	Id uint64 `json:"id"`
+}
+
+type RevokeRoleRequest {
+	UserId uint64 `json:"userId"`
+	RoleId uint64 `json:"roleId"`
+}
+
+type GetUsersRoleRequest {
+	UserId uint64 `json:"userId"`
+}
+
+@server (
+	jwt:        Auth
+	prefix:     /api/v1
+	middleware: AuthInterceptor
+	timeout:    15s
+)
+service fca-api {
+	// Role Management
+	@handler CreateRoleHandler
+	post /role/create (CreateRoleRequest) returns (RoleResponse)
+
+	@handler UpdateRoleHandler
+	post /role/update (UpdateRoleRequest) returns (RoleResponse)
+
+	@handler DeleteRoleHandler
+	post /role/delete (DeleteRoleRequest) returns (Response)
+
+	@handler GetRoleHandler
+	post /role/read (GetRoleRequest) returns (GetRoleResponse)
+
+	@handler ListRolesHandler
+	post /role/list (RoleListRequest) returns (RoleListResponse)
+
+	// Permission Management
+	@handler CreatePermissionHandler
+	post /permission/create (CreatePermissionRequest) returns (PermissionResponse)
+
+	@handler UpdatePermissionHandler
+	post /permission/update (UpdatePermissionRequest) returns (PermissionResponse)
+
+	@handler DeletePermissionHandler
+	post /permission/delete (DeletePermissionRequest) returns (Response)
+
+	@handler GetPermissionHandler
+	post /permission/read (GetpermissionRequest) returns (PermissionResponse)
+
+	@handler ListPermissionsHandler
+	post /permission/list (PermissionListRequest) returns (PermissionListResponse)
+
+	// User Role Assignment
+	@handler AssignRoleHandler
+	post /user/role/assign (AssignRoleRequest) returns (Response)
+
+	@handler RevokeRoleHandler
+	post /user/role/revoke (RevokeRoleRequest) returns (Response)
+
+	@handler GetUserRolesHandler
+	post /user/roles (GetUsersRoleRequest) returns (UserRolesResponse)
+}
+
+//============organization==============
+type CreateOrgResp {
+	Response
+	Data Organization `json:"data,omitempty"`
+}
+
+type Organization {
+	OrgId     uint64 `json:"orgId"`
+	OrgName   string `json:"orgName"`
+	CreatedBy uint64 `json:"createdBy"`
+	UpdatedAt uint64 `json:"updatedAt"`
+	CreatedAt uint64 `json:"createdAt"`
+	IsPrivate uint64 `json:"isPrivate"`
+	IsDefault uint64 `json:"isDefault"`
+	Username  string `json:"username"`
+}
+
+type CreateOrgRequest {
+	OrgName   string `json:"orgName"`
+	IsPrivate uint64 `json:"isPrivate"`
+	IsDefault uint64 `json:"isDefault,optional"`
+}
+
+type UpdateOrgRequest {
+	OrgId     uint64 `json:"orgId"`
+	OrgName   string `json:"orgName"`
+	IsPrivate uint64 `json:"isPrivate"`
+	IsDefault uint64 `json:"isDefault"`
+}
+
+type ListOrgRequest {
+	PageRequest
+}
+
+type ListOrgResp {
+	Response
+	Data ListOrgRespData `json:"data,omitempty"`
+}
+
+type ListOrgRespData {
+	Orgs  []Organization `json:"orgs"`
+	Total int            `json:"total"`
+}
+
+type DeleteOrgRequest {
+	OrgId uint64 `json:"orgId"`
+}
+ 
+
+@server (
+	jwt:        Auth
+	prefix:     /api/v1
+	middleware: AuthInterceptor
+	group:      organization
+	timeout:    15s
+)
+service fca-api {
+	// Role Management
+
+	
+	// @doc "Add an organization,and be the owner of the organization"
+	// @handler CreateOrgHandler
+	// post /org/create (CreateOrgRequest) returns (CreateOrgResp)
+
+	// @doc "Update an organization name and private"
+	// @handler UpdateOrgHandler
+	// post /org/update (UpdateOrgRequest) returns (Response)
+
+	// @doc "List all public organizations"
+	// @handler ListOrgHandler
+	// post /org/list (ListOrgRequest) returns (ListOrgResp)
+
+	// @doc "Delete an organization of my own"
+	// @handler DeleteOrgHandler
+	// post /org/delete (DeleteOrgRequest) returns (Response)
+}
+
+@server (
+	jwt:        Auth
+	prefix:     /api/v1
+	middleware: AuthInterceptor
+	group:      admin
+	timeout:    15s
+)
+service fca-api {
+	
+}
+
+//============organization==============
+type Tag {
+	TagID   uint64 `json:"tagId"`
+	TagName string `json:"tagName"`
+}
+
+type Servers {
+	ServerId         uint64 `json:"serverId"`
+	ServerName       string `json:"serverName"`
+	IsOnline         int64  `json:"isOnline"`
+	BillingMethod    uint64 `json:"billingMethod"` // 计费方式
+	RegionId         uint64 `json:"regionId"` // 地区
+	IsPayMin         int64  `json:"isPayMin"`
+	IsPayDaily       int64  `json:"isPayDaily"`
+	IsPayMonthly     int64  `json:"isPayMonthly"`
+	IsPayYearly      int64  `json:"isPayYearly"`
+	PayPrices        string `json:"payPrices"`
+	DiskPayPrices    string `json:"diskPayPrices"`
+	Supplier         uint64 `json:"supplier"` // 供应商
+	GpuModel         uint64 `json:"gpuModel"` // GPU型号
+	GpuCount         uint64 `json:"gpuCount"` // GPU数量
+	GpuUsed          int64  `json:"gpuUsed"` // 已使用GPU数量
+	GpuMem           uint64 `json:"gpuMem"` // 显存
+	CpuModel         uint64 `json:"cpuModel"` // CPU型号
+	CpuCores         uint64 `json:"cpuCores"` // CPU核数
+	CpuFrequency     int64  `json:"cpuFrequency"` // cpu频率
+	ThreadCount      uint64 `json:"threadCount"` // 处理器线程数量
+	Memory           uint64 `json:"memory"` // 内存(GB)
+	SystemDisk       uint64 `json:"systemDisk"` // 系统盘(GB)
+	DataDisk         uint64 `json:"dataDisk"` // 数据盘(GB)
+	MaxDataDisk      uint64 `json:"maxDataDisk"` // 最大数据盘(GB)
+	SpeedDesc        string `json:"speedDesc"` // 运算速度
+	OsName           string `json:"osName"` // 操作系统名称
+	OsVersion        string `json:"osVersion"` // 操作系统版本号
+	KernelVersion    string `json:"kernelVersion"` // 内核版本
+	GpuDriver        string `json:"gpuDriver"` // GPU驱动
+	CudaVersion      string `json:"cudaVersion"` // cuda版本
+	DockerVersion    string `json:"dockerVersion"` // Docker版本号
+	NvidiaDocker     int64  `json:"nvidiaDocker"` // 是否支持nvidia-docker
+	NetworkDownSpeed int64  `json:"networkDownSpeed"` // 网络下载速度
+	NetworkUpSpeed   int64  `json:"networkUpSpeed"` // 网络上传速度
+	AgentVersion     string `json:"agentVersion"` // 代理版本号
+	Cost             uint64 `json:"cost"` // 费用
+	Available        uint64 `json:"available"` // 空闲数量
+	Total            uint64 `json:"total"` // 可用总量
+	ExpireDate       uint64 `json:"expireDate"` // 到期时间
+	RegionName       string `json:"regionName"` // 地区
+	RegionCode       string `json:"regionCode"`
+	Tags             []Tag  `json:"tags"`
+}
+ 
+type Discount {
+	DiscountId uint64 `json:"discountId"` // Discount ID
+	OrgId      uint64 `json:"orgId"` // Organization ID
+	IsDeleted  int64  `json:"isDeleted"` // Soft delete flag
+	DeletedAt  uint64 `json:"deletedAt,optional"` // Deletion time
+	CreatedAt  uint64 `json:"createdAt"` // Creation time
+	CreatedBy  uint64 `json:"createdBy"` // Creator ID
+	Memo       string `json:"memo,optional"` // Optional memo
+	Name       string `json:"name,optional"` // Optional name
+	Startdate  uint64 `json:"startDate"` // Discount start date
+	Enddate    uint64 `json:"endDate"` // Discount end date
+	Discount   int64  `json:"discount"` // Discount value (100 means 10.0)
+}
+
+@server (
+	prefix:  /api/v1
+	group:   web
+	timeout: 15s
+)
+service fca-api {
+
+}
+
+//////// new  resource
+import "sub-apis/fca-updownload.api"
+import "sub-apis/fca-mysql-backup.api"
+import "sub-apis/fca-ai.api"
+import "sub-apis/fca-filemanager.api"
+import "sub-apis/fca-html.api"
+import "../knowdata/knowsource-doc.api"
+import "knowsource.api"
